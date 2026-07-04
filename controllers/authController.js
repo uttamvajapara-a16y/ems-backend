@@ -1,5 +1,6 @@
 const Employee = require("../models/employee");
 const HR = require("../models/hr");
+const Admin = require("../models/admin");
 const { validateSignup } = require("../utils/validation");
 const bcrypt = require("bcrypt");
 
@@ -26,7 +27,7 @@ const registerUser = async (req, res, next) => {
             res.cookie("token", token, { httpOnly: true, maxAge: 10 * 60 * 60 * 1000 });
 
             res.json({ message: "employee added successfully", data: savedEmployee });
-        } else if(role === 'HR'){
+        } else if (role === 'HR') {
             const hr = new HR({
                 firstName,
                 lastName,
@@ -44,7 +45,7 @@ const registerUser = async (req, res, next) => {
             res.json({ message: "HR added successfully", data: savedHr });
         }
 
-        
+
     } catch (err) {
         next(err);
     }
@@ -79,6 +80,22 @@ const login = async (req, res, next) => {
                 res.send(hr);
             } else
                 throw new Error("invalid credentials");
+        } else if (role === "Admin") {
+            const admin = await Admin.findOne({ emailId });
+            if (!admin) throw new Error("invalid credentials");
+            if (password !== admin.password) throw new Error("invalid credentials");
+            const token = await admin.getJWT();
+            res.cookie("token", token, { httpOnly: true, maxAge: 10 * 60 * 60 * 1000 });
+            res.send(admin);
+
+            // const isPasswordValid = await admin.validatePassword(password) ;
+
+            // if(isPasswordValid){
+            //     const token = await admin.getJWT() ;
+            //     res.cookie("token", token, { httpOnly: true, maxAge: 10 * 60 * 60 * 1000 });
+            //     res.send(admin) ;
+            // } else
+            //     throw new Error("invalid credentials") ;
         }
     } catch (err) {
         next(err);

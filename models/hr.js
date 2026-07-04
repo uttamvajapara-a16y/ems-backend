@@ -60,7 +60,7 @@ const hrSchema = new mongoose.Schema({
     } , 
     managerId: {
         type: mongoose.Schema.Types.ObjectId ,
-        ref: "User"
+        ref: "Manager"
     } ,
     designation: {
         type: String ,

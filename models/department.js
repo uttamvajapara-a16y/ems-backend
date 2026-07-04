@@ -1,4 +1,4 @@
-const mongoose = require('mongoose') ,
+const mongoose = require('mongoose') ;
 
 const departmentSchema = new mongoose.Schema({
     departmentName: {
@@ -20,7 +20,7 @@ const departmentSchema = new mongoose.Schema({
     headId: {
         type: mongoose.Schema.Types.ObjectId ,
         required : true ,
-        ref: "User"
+        ref: "Manager"
     }
 })
 
