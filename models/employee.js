@@ -4,7 +4,7 @@ const jwt = require('jsonwebtoken') ;
 const bcrypt = require('bcrypt') ;
 require('dotenv').config() ;
 
-const userSchema = new mongoose.Schema({
+const employeeSchema = new mongoose.Schema({
     firstName : {
         type: String ,
         required : true ,
@@ -46,12 +46,6 @@ const userSchema = new mongoose.Schema({
             if(!["male" , "female" , "other"].includes(value)) throw new Error("enter valid gender") ;
         }
     } ,
-    role: {
-        type: String ,
-        validate(value){
-            if(!["admin" , "HR" , "manager" , "employee"].includes(value)) throw new Error("enter valid role") ;
-        }
-    } , 
     profileImage: {
         type: String ,
         default: "https://geographyandyou.com/images/user-profile.png" ,
@@ -97,14 +91,14 @@ const userSchema = new mongoose.Schema({
     timestamps: true
 })
 
-userSchema.methods.getJWT = async function() {
+employeeSchema.methods.getJWT = async function() {
     const user = this ;
 
     const token = await jwt.sign({_id: user._id} , process.env.JWT_SECRET_KEY , {expiresIn : '2d'}) ;
     return token ;
 }
 
-userSchema.methods.validatePassword = async function (passwordByUser) {
+employeeSchema.methods.validatePassword = async function (passwordByUser) {
     const user = this ;
     const passwordhash = user.password ;
 
@@ -112,4 +106,4 @@ userSchema.methods.validatePassword = async function (passwordByUser) {
     return isValidPassword ;
 }
 
-module.exports = mongoose.model("User" , userSchema) ;
+module.exports = mongoose.model("Employee" , employeeSchema) ;
