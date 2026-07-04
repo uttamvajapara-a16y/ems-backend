@@ -1,10 +1,16 @@
 const mongoose = require('mongoose') ;
 
+
 const attendanceSchema = new mongoose.Schema({
     employeeId: {
         type: mongoose.Schema.Types.ObjectId ,
         ref: "Employee" ,
         required: true
+    } ,
+    departmentId: {
+        type: mongoose.Schema.Types.ObjectId ,
+        required: true,
+        ref: "Department"
     } ,
     date: {
         type: Date ,
@@ -14,7 +20,7 @@ const attendanceSchema = new mongoose.Schema({
     checkIn: {
         type: Date 
     } , 
-    checkout: {
+    checkOut: {
         type: Date
     } ,
     status: {
@@ -33,13 +39,14 @@ const attendanceSchema = new mongoose.Schema({
 // to Prevent duplicate attendance entries for the same employee on the same day
 attendanceSchema.index({employeeId: 1, date: 1}, {unique: true}) ;
 
-attendanceSchema.pre("save", function (next) {
+attendanceSchema.pre("save", function () {
   if (this.checkIn && this.checkOut) {
     const diffMs = this.checkOut - this.checkIn;
     this.workingHours = +(diffMs / (1000 * 60 * 60)).toFixed(2);
-    this.status = this.workingHours >= 6 ? "present" : "half-day";
+    if(this.workingHours < 2) this.status = "absent";
+    else
+        this.status = this.workingHours >= 6 ? "present" : "half-day";
   }
-  next();
 });
 
 module.exports = mongoose.model("Attendance" , attendanceSchema) ;

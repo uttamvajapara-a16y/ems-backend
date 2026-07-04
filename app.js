@@ -10,6 +10,7 @@ const { errorHandler } = require("./middleware/errorHendler.middleware");
 const authRouter = require("./routes/authRouter");
 const employeeRouter = require("./routes/employeeRouter");
 const departmentRouter = require("./routes/departmentRouter");
+const attendanceRouter = require("./routes/attendanceRouter");
 
 
 const app = express();
@@ -28,6 +29,7 @@ app.use(cors({
 app.use("/api" , authRouter) ;
 app.use("/api" , employeeRouter) ;
 app.use("/api" , departmentRouter) ;
+app.use("/api" , attendanceRouter) ;
 
 
 app.use(errorHandler) ;
