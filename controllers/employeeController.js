@@ -1,4 +1,5 @@
 const Employee = require("../models/employee");
+const cloudinary = require("../config/cloudinary") ;
 
 const getEmployees = async (req, res, next) => {
     try {
@@ -78,11 +79,17 @@ const updateEmployee = async (req , res , next) => {
 
         const isEditValid = Object.keys(req.body).every(field => allowedUpdates.includes(field)) ;
 
+        let profileImage = '';
+        if (req.file) {
+            const result = await cloudinary.uploader.upload(req.file.path);
+            profileImage = result.secure_url;
+        }
+
         if(!isEditValid){
             throw new Error ("update not valid") ;
         } else {
             const {id} = req.params ;
-            const emp = await Employee.findByIdAndUpdate(id , req.body , {new: true , runValidators: true}).select("-password") ;
+            const emp = await Employee.findByIdAndUpdate(id , req.body , {runValidators: true , returnDocument: "after"}).select("-password") ;
             return res.status(200).json({
                 success: true,
                 message: "employee updated successfully",
