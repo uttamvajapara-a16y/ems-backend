@@ -1,68 +1,85 @@
 const mongoose = require('mongoose')
 
 const leaveSchema = new mongoose.Schema({
-    employeeId: {
-        type: mongoose.Schema.Types.ObjectId ,
-        ref: "User" ,
+    applierId: {
+        type: mongoose.Schema.Types.ObjectId,
+        required: true,
+        refPath: "applierModel",   // <-- changed ref to refPath
+    },
+    applierModel: {
+        type: String,
+        required: true,
+        enum: ["Employee", "Manager", "HR" , "Admin"],
+    },
+    departmentId: {
+        type: mongoose.Schema.Types.ObjectId,
         required: true
+    },
+    role: {
+        type: String,
+        required: true,
+        enum: ["Employee", "Manager", "HR" , "Admin"],
     } ,
     startDate: {
-        type: Date ,
+        type: Date,
         required: true
-    } ,
+    },
     endDate: {
-        type: Date ,
-        required: true ,
+        type: Date,
+        required: true,
         validate: {
-            validator: function(endDate) {
+            validator: function (endDate) {
                 return endDate >= this.startDate;
             },
             message: "End date must be greater than or equal to start date"
         }
-    } ,
+    },
     totalDays: {
         type: Number
-    } ,
+    },
     leaveType: {
-        type: String ,
-        enum: ["casual", "sick", "maternity", "paternity", "unpaid" , "paid"] ,
+        type: String,
+        enum: ["casual", "sick", "maternity", "paternity", "unpaid", "paid"],
         required: true
-    } ,
+    },
     reason: {
-        type: String ,
-        required: true ,
-        trim: true ,
-        minLength: [10 , "Reason must be at least 10 characters"],
-        maxLength: [100 , "Reason can not exceed 100 characters"]
-    } ,
+        type: String,
+        required: true,
+        trim: true,
+        minLength: [10, "Reason must be at least 10 characters"],
+        maxLength: [100, "Reason can not exceed 100 characters"]
+    },
     status: {
-        type: String ,
-        enum: ["pending", "approved", "rejected" , "cancelled"] ,
+        type: String,
+        required: true ,
+        enum: ["pending", "approved", "rejected"],
         default: "pending"
     },
-    approvedBy: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User", 
-      default: null,
+    reviewerId: {
+        type: mongoose.Schema.Types.ObjectId,
+        refpath: "reviewerModel",
     },
-    approvedAt: {
-      type: Date,
-      default: null,
+    reviewerModel: {
+        type: String,
+        enum: ["HR" , "Admin"],
+    },
+    reviewedAt: {
+        type: Date,
+        default: null,
     },
     rejectionReason: {
-      type: String,
-      trim: true,
+        type: String,
+        trim: true,
     },
-},{
+}, {
     timestamps: true
 })
 
-leaveSchema.pre("save" , function(next){
-    if(this.startDate && this.endDate){
-        const diffTime = this.endDate - this.startDate ;
-        this.totalDays = Math.floor(diffTime / (1000 * 60 * 60 * 24)) + 1 ;
+leaveSchema.pre("save", function () {
+    if (this.startDate && this.endDate) {
+        const diffTime = this.endDate - this.startDate;
+        this.totalDays = Math.floor(diffTime / (1000 * 60 * 60 * 24)) + 1;
     }
-    next()
 })
 
-module.exports = mongoose.model("Leave" , leaveSchema) ;
+module.exports = mongoose.model("Leave", leaveSchema);

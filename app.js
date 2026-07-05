@@ -11,6 +11,7 @@ const authRouter = require("./routes/authRouter");
 const employeeRouter = require("./routes/employeeRouter");
 const departmentRouter = require("./routes/departmentRouter");
 const attendanceRouter = require("./routes/attendanceRouter");
+const leaveRouter = require("./routes/leaveRouter");
 
 
 const app = express();
@@ -30,6 +31,7 @@ app.use("/api" , authRouter) ;
 app.use("/api" , employeeRouter) ;
 app.use("/api" , departmentRouter) ;
 app.use("/api" , attendanceRouter) ;
+app.use('/api' , leaveRouter) ;
 
 
 app.use(errorHandler) ;

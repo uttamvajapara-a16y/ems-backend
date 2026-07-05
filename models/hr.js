@@ -46,6 +46,10 @@ const hrSchema = new mongoose.Schema({
             if(!["male" , "female" , "other"].includes(value)) throw new Error("enter valid gender") ;
         }
     } ,
+    role:{
+        type: String ,
+        default: "HR" 
+    } ,
     profileImage: {
         type: String ,
         default: "https://geographyandyou.com/images/user-profile.png" ,
