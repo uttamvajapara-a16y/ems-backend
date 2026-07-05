@@ -3,39 +3,8 @@ const Attendance = require("../models/attendance");
 const Employee = require("../models/employee");
 const HR = require("../models/hr");
 const PDFDocument = require("pdfkit");
-
-const calculateDeductions = async (empId, month, year, basicSalary) => {
-    const startOfMonth = new Date(year, month - 1, 1);
-    const endOfMonth = new Date(year, month, 0, 23, 59, 59);
-
-    const absentDays = await Attendance.countDocuments({
-        employeeId: empId,
-        date: { $gte: startOfMonth, $lte: endOfMonth },
-        status: "absent",
-    });
-
-    const perDaySalary = basicSalary / 30;
-    return +(absentDays * perDaySalary).toFixed(2);
-}
-
-const validatePayrollMonth = (month, year) => {
-  const requestedMonth = Number(month);
-  const requestedYear = Number(year);
-
-  const now = new Date();
-  const currentMonth = now.getMonth() + 1; // JS months are 0-indexed, so add 1
-  const currentYear = now.getFullYear();
-
-  if (requestedYear > currentYear) {
-    return { valid: false, message: "Cannot generate payroll for a future year" };
-  }
-
-  if (requestedYear === currentYear && requestedMonth >= currentMonth) {
-    return { valid: false, message: "Cannot generate payroll for the current or a future month" };
-  }
-
-  return { valid: true };
-};
+const {calculateDeductions} = require('../utils/deductionCounter') ;
+const {validatePayrollMonth} = require('../utils/monthValidation') ;
 
 const generatePayroll = async (req, res, next) => {
     try {
@@ -63,10 +32,12 @@ const generatePayroll = async (req, res, next) => {
             basicSalary,
             allowances,
             deductions,
-            eployeeModel: "Employee",
+            employeeModel: "Employee",
             generatedBy: req.user._id,
             generatorModel: req.user.role,
         });
+
+        await (await payroll.populate("employeeId", "firstName lastName emailId designation")).populate("generatedBy" , "firstName lastName")
 
         res.status(201).json({ success: true, message: "Payroll generated", data: payroll });
 

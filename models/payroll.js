@@ -51,7 +51,6 @@ const payrollSchema = new mongoose.Schema({
     paymentMethod: {
       type: String,
       enum: ["bank_transfer", "cash", "cheque"],
-      default: "bank_transfer",
     },
     generatedBy: {
       type: mongoose.Schema.Types.ObjectId,
