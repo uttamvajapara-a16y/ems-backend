@@ -3,7 +3,12 @@ const mongoose = require('mongoose') ;
 const payrollSchema = new mongoose.Schema({
     employeeId: {
         type: mongoose.Schema.Types.ObjectId ,
-        ref: "User" ,
+        refPath: "employeeModel" ,
+        required: true
+    } ,
+    employeeModel: {
+        type: String ,
+        enum: ["HR", "Employee", "Admin", "Manager"] ,
         required: true
     } ,
     month: {
@@ -50,17 +55,21 @@ const payrollSchema = new mongoose.Schema({
     },
     generatedBy: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
+      refPath: "generatorModel",
     },
+    generatorModel: {
+        type: String ,
+        enum: ["HR", "Admin"] ,
+        required: true
+    }
 } , {
     timestamps: true
 })
 
 payrollSchema.index({employeeId: 1 , month: 1 , year: 1} , {unique: true}) ; 
 
-payrollSchema.pre("save" , function(next){
-    this.netSalary = this.baseSalary + this.allowances - this.deductions ;
-    next() ;
+payrollSchema.pre("save" , function(){
+    this.netSalary = this.basicSalary + this.allowances - this.deductions ;
 }) ;
 
 module.exports = mongoose.model("Payroll" , payrollSchema) ;

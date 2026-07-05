@@ -4,9 +4,14 @@ const mongoose = require('mongoose') ;
 const attendanceSchema = new mongoose.Schema({
     employeeId: {
         type: mongoose.Schema.Types.ObjectId ,
-        ref: "Employee" ,
+        refpath: "attenderModel" ,
         required: true
     } ,
+    attenderModel: {
+        type: String ,
+        required: true ,
+        enum: ["Employee", "HR"] 
+    },
     departmentId: {
         type: mongoose.Schema.Types.ObjectId ,
         required: true,
