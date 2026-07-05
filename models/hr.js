@@ -66,12 +66,6 @@ const hrSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId ,
         ref: "Manager"
     } ,
-    designation: {
-        type: String ,
-        validate(value){
-            if(!["jr.developer", "sr.developer", "teamleader", "manager", "HR"].includes(value)) throw new Error("enter valid designation") ;
-        }
-    } ,
     dateOfJoining: {
         type: Date ,
         validate(value){
