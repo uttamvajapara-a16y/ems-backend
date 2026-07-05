@@ -5,10 +5,18 @@ const validator = require('validator');
 require('dotenv').config() ;
 
 const adminSchema = new mongoose.Schema({
-    name: {
+    firstName: {
         type: String,
         required: true,
+        minLength: 3 ,
+        maxLength: 20
     },
+    lastName:{
+        type: String,
+        required: true,
+        minLength: 3 ,
+        maxLength: 20
+    } ,
     role: {
         type: String,
         default: "Admin"

@@ -17,7 +17,7 @@ const auditLogDB = (action, targetType) => {
                 }
             }
         }) ;
-        next() ;
+        next() ; 
     }
 }
 

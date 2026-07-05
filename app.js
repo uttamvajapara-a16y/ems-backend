@@ -13,6 +13,7 @@ const departmentRouter = require("./routes/departmentRouter");
 const attendanceRouter = require("./routes/attendanceRouter");
 const leaveRouter = require("./routes/leaveRouter");
 const dashboardRouter = require("./routes/dashboardRouter");
+const adminRouter = require("./routes/adminRouter");
 
 
 const app = express();
@@ -34,6 +35,7 @@ app.use("/api" , departmentRouter) ;
 app.use("/api" , attendanceRouter) ;
 app.use('/api' , leaveRouter) ;
 app.use('/api' , dashboardRouter) ;
+app.use("/api" , adminRouter) ;
 
 
 app.use(errorHandler) ;

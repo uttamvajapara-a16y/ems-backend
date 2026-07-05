@@ -110,4 +110,18 @@ const deleteEmployee = async (req, res, next) => {
     }
 }
 
-module.exports = { getEmployees, getEmployeeById, deleteEmployee, updateEmployee };
+const getProfile = async (req , res , next) => {
+    try{
+        const employee = req.employee ;
+        if(!employee) return res.status(404).json({success: false , message: "employee not found"}) ;
+        res.status(200).json({
+            success: true,
+            message: "request successfull",
+            data: employee
+        })
+    } catch (err) {
+        next(err) ;
+    }
+}
+
+module.exports = { getEmployees, getEmployeeById, deleteEmployee, updateEmployee, getProfile };

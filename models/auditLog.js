@@ -2,37 +2,43 @@ const mongoose = require('mongoose')
 
 const auditLogSchema = new mongoose.Schema({
     userId: {
-        type: mongoose.Schema.Types.ObjectId ,
-        ref: "User" ,
+        type: mongoose.Schema.Types.ObjectId,
+        refpath: "userMode",
         required: true
-    } ,
-    action: {
-        type: String ,
-        required: true ,
-        enum: ["CREATE" , "UPDATE" , "DELETE" , "APPROVE" , "REJECT" , "LOGIN" , "LOGOUT"]
-    } ,
-    targetType: {
-      type: String,
-      required: true,
-      enum: ["Employee", "Department", "Attendance", "Leave", "Payroll", "User"] 
     },
-    targetId: {
-        type:  mongoose.Schema.Types.ObjectId,
-        required: true
-    } ,
+    userMode: {
+        type: String,
+        required: true,
+        enum: ["Employee", "Manager", "HR", "Admin"],
+    },
+    action: {
+        type: String,
+        required: true,
+        enum: ["CREATE", "UPDATE", "DELETE", "APPROVE", "REJECT", "LOGIN", "LOGOUT"]
+    },
+    targetType: {
+        type: String,
+        required: true,
+        enum: ["Employee", "Department", "Attendance", "Leave", "Payroll", "Admin", "HR"]
+    },
+    date: {
+        type: Date,
+        required: true,
+        default: Date.now()
+    },
     changes: {
-        type: Map ,
+        type: Map,
         of: mongoose.Schema.Types.Mixed,
         default: {}
     }
-} , {
+}, {
     timestamps: true
 })
 
 auditLogSchema.index({ userId: 1, createdAt: -1 });
 auditLogSchema.index({ targetType: 1, targetId: 1 });
 
-module.exports = mongoose.model("AuditLog" , auditLogSchema) ;
+module.exports = mongoose.model("AuditLog", auditLogSchema);
 
 
 

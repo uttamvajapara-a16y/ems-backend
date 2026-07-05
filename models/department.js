@@ -8,7 +8,7 @@ const departmentSchema = new mongoose.Schema({
         trim: true,
         uppercase: true ,
         minLength: 3 ,
-        maxLength: 10
+        maxLength: 20
     } ,
     description: {
         type: String ,

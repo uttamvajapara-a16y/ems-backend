@@ -79,4 +79,18 @@ const deleteHr = async (req , res , next) => {
     }
 }
 
-module.exports = { getHr, getHrById, updateHr, deleteHr };
+const getProfile = async (req , res , next) => {
+    try{
+        const hr = req.hr ;
+        if(!hr) return res.status(404).json({success: false , message: "hr not found"}) ;
+        res.status(200).json({
+            success: true,
+            message: "request successfull",
+            data: hr
+        })
+    } catch (err) {
+        next(err) ;
+    }
+}
+
+module.exports = { getHr, getHrById, updateHr, deleteHr, getProfile };

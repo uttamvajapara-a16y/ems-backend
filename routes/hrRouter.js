@@ -4,10 +4,11 @@ const { registerUser, login } = require('../controllers/authController');
 
 const hrRouter = express.Router() ;
 
-const { getHr, getHrById, updateHr, deleteHr } = require('../controllers/hrController');
+const { getHr, getHrById, updateHr, deleteHr, getProfile } = require('../controllers/hrController');
 
 hrRouter.post('/hr/create' , adminAuth , registerUser) ;
-hrRouter.get("/hr/getHr" ,userAuth , getHr) ;
+hrRouter.get('/hr/profile', hrAuth, getProfile ) ;
+hrRouter.get("/hr/getHr" ,roleAuth , getHr) ;
 hrRouter.get("/hr/get/:id" , userAuth, getHrById) ;
 hrRouter.put("/hr/update/:id", roleAuth, updateHr) ;
 hrRouter.delete("/hr/delete/:id", adminAuth, deleteHr) ;

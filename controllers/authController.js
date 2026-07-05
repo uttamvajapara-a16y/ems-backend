@@ -24,9 +24,9 @@ const registerUser = async (req, res, next) => {
 
             if (req.user) return res.json({ message: "employee added successfully", data: savedEmployee });
 
-            const token = await savedEmployee.getJWT();
-            res.cookie("token", token, { httpOnly: true, maxAge: 10 * 60 * 60 * 1000 });
-            res.json({ message: "employee added successfully", data: savedEmployee });
+            // const token = await savedEmployee.getJWT();
+            // res.cookie("token", token, { httpOnly: true, maxAge: 10 * 60 * 60 * 1000 });
+            // res.json({ message: "employee added successfully", data: savedEmployee });
         } else if (role === 'HR') {
             const hr = new HR({
                 firstName,
@@ -40,9 +40,26 @@ const registerUser = async (req, res, next) => {
 
             if (req.user) return res.json({ message: "HR added successfully", data: savedHr });
 
-            const token = await savedHr.getJWT();
-            res.cookie("token", token, { httpOnly: true, maxAge: 10 * 60 * 60 * 1000 });
-            res.json({ message: "HR added successfully", data: savedHr });
+            // const token = await savedHr.getJWT();
+            // res.cookie("token", token, { httpOnly: true, maxAge: 10 * 60 * 60 * 1000 });
+            // res.json({ message: "HR added successfully", data: savedHr });
+        } else if(role === "Admin") {
+            const admin = new Admin({
+                firstName,
+                lastName,
+                emailId,
+                password: passwordHash,
+            })
+            console.log(admin) ;
+            const savedAdmin = await admin.save();
+
+            res.status(201).json({
+                success: true,
+                message: "Admin added successfully",
+                data: savedAdmin
+            })
+        } else {
+            return res.status(400).json({ error: "please provide valid role" })
         }
 
 
@@ -84,10 +101,10 @@ const login = async (req, res, next) => {
             const admin = await Admin.findOne({ emailId });
             if (!admin) throw new Error("invalid credentials : email");
 
-            if(admin.password !== password) throw new Error("invalid credentials : password");
+            // if(admin.password !== password) throw new Error("invalid credentials : password");
 
-            // const isPasswordValid = await admin.validatePassword(password);
-            // if (!isPasswordValid) throw new Error("invalid credentials: password");
+            const isPasswordValid = await admin.validatePassword(password);
+            if (!isPasswordValid) throw new Error("invalid credentials: password");
             const token = await admin.getJWT();
             res.cookie("token", token, { httpOnly: true, maxAge: 10 * 60 * 60 * 1000 });
             res.send(admin);

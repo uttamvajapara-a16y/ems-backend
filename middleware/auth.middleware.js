@@ -72,10 +72,10 @@ const adminAuth = async (req, res, next) => {
 
         const { _id } = await jwt.verify(token, process.env.JWT_SECRET_KEY);
 
-        const user = await Admin.findById(_id);
+        const user = await Admin.findById(_id).select("-password");
         if (!user) throw new Error("access denied");
 
-        req.user = user;
+        req.admin = user;
         next();
     } catch (err) {
         if (err.name === "TokenExpiredError")
