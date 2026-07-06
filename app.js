@@ -15,6 +15,7 @@ const leaveRouter = require("./routes/leaveRouter");
 const dashboardRouter = require("./routes/dashboardRouter");
 const adminRouter = require("./routes/adminRouter");
 const payrollRouter = require("./routes/payrollRouter");
+const profileRouter = require("./routes/profileRouter");
 
 
 const app = express();
@@ -25,8 +26,9 @@ app.use(cookieParser()) ;
 
 
 app.use(cors({
-    origin : "*",
+    origin : "http://localhost:5173/",
     methods : ["GET" , "POST" , "PUT" , "DELETE"],
+    credentials: true
 }));
 
 
@@ -38,6 +40,7 @@ app.use('/api' , leaveRouter) ;
 app.use('/api' , dashboardRouter) ;
 app.use("/api" , adminRouter) ;
 app.use("/api" , payrollRouter) ;
+app.use("/api" , profileRouter) ;
 
 
 app.use(errorHandler) ;
