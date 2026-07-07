@@ -40,6 +40,12 @@ const employeeSchema = new mongoose.Schema({
         min: 18,
         max: 50
     },
+    phone:{
+        type: String,
+        validate(value) {
+            if (!validator.isMobilePhone(value)) throw new Error("enter valid phone number");
+        }
+    },
     gender: {
         type: String,
         validate(value) {
@@ -90,6 +96,11 @@ const employeeSchema = new mongoose.Schema({
         validate(value) {
             if (!["active", "inactive"].includes(value)) throw new Error("enter valid status");
         }
+    },
+    Address: {
+        type: String ,
+        minLength: 10 ,
+        maxLength: 100
     }
 }, {
     timestamps: true

@@ -1,7 +1,25 @@
 const Attendance = require('../models/attendance');
+const Admin = require("../models/admin");
+
+let stTime;
+let endTime;
+const now = new Date();
+now.setSeconds(0, 0);
+
+const workingTime = async () => {
+    try {
+        const admin = await Admin.findOne();
+        if (!admin) throw new Error("admin not found");
+        stTime = admin.stTime;
+        endTime = admin.endTime;
+    } catch (err) {
+        next(err);
+    }
+}
 
 const checkIn = async (req, res, next) => {
     try {
+        if (now < stTime) return res.status(400).json({ success: false, message: "attendance can't be marked before working time" });
         const emp = req.user;
         const { _id, departmentId } = emp;
         const today = new Date();
@@ -37,6 +55,12 @@ const checkOut = async (req, res, next) => {
         if (!attendance) return res.status(400).json({ success: false, message: "please check in first" });
         if (attendance.checkOut) return res.status(400).json({ success: false, message: "you have already checked out today" });
 
+        if (now > endTime) {
+            attendance.checkOut = endTime;
+            await attendance.save();
+            res.status(200).json({ success: true, message: "check out successful", data: attendance });
+        }
+
         attendance.checkOut = new Date();
         await attendance.save();
         res.status(200).json({ success: true, message: "check out successful", data: attendance });
@@ -47,7 +71,7 @@ const checkOut = async (req, res, next) => {
 
 const getAttendance = async (req, res, next) => {
     try {
-        let employeeId ;
+        let employeeId;
         const { month, year, empId } = req.query;
         if (empId) employeeId = empId;
         if (!empId) employeeId = req.user._id;

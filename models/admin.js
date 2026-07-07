@@ -34,7 +34,15 @@ const adminSchema = new mongoose.Schema({
     password: {
         type: String,
         required: true,
-    }
+    },
+    stTime: {
+        type: Date,
+        default: new Date().setHours(10, 0, 0, 0)
+    } ,
+    endTime: {
+        type: Date,
+        default: new Date().setHours(22, 0, 0, 0)
+    }   
 });
 
 adminSchema.methods.validatePassword = async function (passwordByUser) {

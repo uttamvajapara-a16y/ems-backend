@@ -80,7 +80,7 @@ const login = async (req, res, next) => {
             const isPasswordValid = await employee.validatePassword(password);
 
             if (isPasswordValid) {
-                await employee.populate("departmentId", "departmentName")
+                await employee.populate("departmentId", "departmentName").select("-password") ;
                 const token = await employee.getJWT();
                 res.cookie("token", token, { httpOnly: true, maxAge: 10 * 60 * 60 * 1000 });
                 res.send(employee);

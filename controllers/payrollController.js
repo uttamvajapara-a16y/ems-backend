@@ -228,15 +228,37 @@ const getPayrollById = async (req, res, next) => {
 }
 
 const getMySlips = async (req, res, next) => {
-    try {
-        const user = req.user;
-        const payrolls = await Payroll.find({ employeeId: user._id }).populate("employeeId", "firstName lastName emailId designation");
-        if(!payrolls) return res.status(404).json({ success: false, message: "No payslips found" });
-        res.status(200).json({ success: true, data: payrolls });
-    } catch (err) {
-        next(err);
-    }
-}
+  try {
+    const user = req.user;
+    const { page = 1, limit = 10 } = req.query;
+
+    const pageNum = Math.max(Number(page), 1);
+    const limitNum = Math.min(Number(limit), 50); // cap to prevent abuse
+    const skip = (pageNum - 1) * limitNum;
+
+    const [payrolls, totalCount] = await Promise.all([
+      Payroll.find({ employeeId: user._id })
+        .populate("employeeId", "firstName lastName emailId designation")
+        .sort({ year: -1, month: -1 }) // most recent payslip first
+        .skip(skip)
+        .limit(limitNum),
+      Payroll.countDocuments({ employeeId: user._id }),
+    ]);
+
+    res.status(200).json({
+      success: true,
+      data: payrolls,
+      pagination: {
+        totalCount,
+        totalPages: Math.ceil(totalCount / limitNum),
+        currentPage: pageNum,
+        limit: limitNum,
+      },
+    });
+  } catch (err) {
+    next(err);
+  }
+};
 
 const deletePayroll = async (req, res, next) => {
     try{

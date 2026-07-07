@@ -78,19 +78,29 @@ const getEmployeeById = async (req, res, next) => {
 
 const updateEmployee = async (req, res, next) => {
     try {
-        const allowedUpdates = ["firstName", "lastName", "emailId", "age", "gender", "profileImage", "departmentId", "managerId", "designation", "salary", "status"];
+        const allowedUpdates = ["firstName", "lastName", "emailId", "age", "phone", "gender", "profileImage", "departmentId", "managerId", "designation", "salary", "status", "Address"];
 
         const isEditValid = Object.keys(req.body).every(field => allowedUpdates.includes(field));
 
-        let profileImage = '';
-        if (req.file) {
-            const result = await cloudinary.uploader.upload(req.file.path);
-            profileImage = result.secure_url;
-        }
+        console.log(req.file);
 
         if (!isEditValid) {
-            throw new Error("update not valid");
+            return res.status(400).json({ success: false, message: "update not valid" })
         } else {
+            if (req.file) {
+                // const result = await new Promise((resolve, reject) => {
+                //     cloudinary.uploader.upload_stream({ folder: "employee_profiles" }, (error, result) => {
+                //         if (error) reject(error);
+                //         else resolve(result);
+                //     }).end(req.file.buffer);
+                // });
+                // req.body.profileImage = result.secure_url;
+
+                const result = await cloudinary.uploader.upload(req.file.path);
+                req.body.profileImage = result.secure_url;
+            } else {
+                delete req.body.profileImage;
+            }
             const { id } = req.params;
             const emp = await Employee.findByIdAndUpdate(id, req.body, { runValidators: true, returnDocument: "after" }).select("-password");
             return res.status(200).json({
