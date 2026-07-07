@@ -5,6 +5,15 @@ const applyLeave = async (req, res, next) => {
         const user = req.user;
         const { startDate, endDate, leaveType, reason } = req.body;
 
+        if(reason.length < 10) return res.status(400).json({
+            success : false ,
+            message : "reason must be 10 characters long"
+        })
+        if(reason.length > 100) return res.status(400).json({
+            success: false ,
+            message : "reason cannot exceed 100 characters"
+        })
+
         const newStart = new Date(startDate);
         const newEnd = new Date(endDate);
 
@@ -51,6 +60,19 @@ const applyLeave = async (req, res, next) => {
     }
 }
 
+const cancleLeave = async (req, res, next) => {
+    try {
+        const { id } = req.body ;
+        const leaveReq = await Leave.findById(id) ;
+        if(!leaveReq) return res.status(404).json({success: false, message: "leave request not found"}) ;
+        if(!leaveReq.applierId.equals(req.user._id)) return res.status(403).json({success: false, message: "access denied"}) ;
+        await Leave.findByIdAndDelete(id) ;
+        res.status(200).json({success: true, message: "leave cancelled successfully"}) 
+    } catch (err) {
+        next(err) ;
+    }
+}
+
 const reviewLeave = async (req, res, next) => {
     try {
         const { status, leaveId } = req.params;
@@ -82,20 +104,35 @@ const reviewLeave = async (req, res, next) => {
 
 const getLeaveDetails = async (req, res, next) => {
     try {
-        const { page = 1, limit = 10 } = req.query;
+        const { page = 1, limit = 10, month, year } = req.query;
         const skip = (Number(page) - 1) * Number(limit);
+        const now = new Date() ;
+        const targetMonth = month ? Number(month) : now.getMonth() + 1 ;
+        const targetYear = year ? Number(year) : now.getFullYear() ;
 
-        const [leaves, totalCount] = await Promise.all([
-            Leave.find({ applierId: req.user._id })
-                .populate("applierId", "firstName lastName emailId role")
-                .sort({ createdAt: -1 })
-                .skip(skip)
-                .limit(Number(limit)),
-            Leave.countDocuments({ applierId: req.user._id }),
-        ]);
+        const startDate = new Date(targetYear, targetMonth - 1, 1) ;
+        const endDate = new Date(targetYear, targetMonth, 0, 23, 59, 59) ;
+
+        const records = await Leave.find({
+            applierId: req.user._id,
+            startDate: { $gte: startDate, $lte: endDate }
+        }).sort({startDate: 1}).skip(skip).limit(Number(limit)) ;
+
+        const summary = {
+            approvedLeaves: records.filter((r) => r.status === "approved").length ,
+            rejectedLeaves: records.filter((r) => r.status === "rejected").length ,
+            pendingLeaves: records.filter((r) => r.status === "pending").length ,
+            totalLeaves: records.length
+        }
+
+        totalCount = await Leave.countDocuments({ applierId: req.user._id }) ;
+        
         res.status(200).json({
             success: true,
-            data: leaves,
+            month: targetMonth,
+            year: targetYear,
+            data: records,
+            summary,
             pagination: {
                 totalCount,
                 totalPages: Math.ceil(totalCount / limit),
@@ -145,4 +182,4 @@ const getAllLeaveDetails = async (req, res, next) => {
     }
 }
 
-module.exports = { applyLeave, reviewLeave, getLeaveDetails, getAllLeaveDetails };
+module.exports = { applyLeave, reviewLeave, getLeaveDetails, getAllLeaveDetails, cancleLeave };

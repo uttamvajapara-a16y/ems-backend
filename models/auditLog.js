@@ -6,7 +6,7 @@ const auditLogSchema = new mongoose.Schema({
         refpath: "userMode",
         required: true
     },
-    userMode: {
+    userModel: {
         type: String,
         required: true,
         enum: ["Employee", "Manager", "HR", "Admin"],

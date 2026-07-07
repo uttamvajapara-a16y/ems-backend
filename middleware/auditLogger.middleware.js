@@ -10,7 +10,8 @@ const auditLogDB = (action, targetType) => {
                         action,
                         targetType,
                         targetId: req.params.id,
-                        changes: res.locals.changes
+                        changes: res.locals.changes,
+                        userModel: req.user.role
                     })
                 } catch (err) {
                     console.error("auditLog failed :: ", err.message);
