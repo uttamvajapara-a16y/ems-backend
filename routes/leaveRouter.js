@@ -1,5 +1,5 @@
 const mongoose = require('mongoose') ;
-const express = require('express') ;
+const express = require('express') ; 
 
 const { userAuth, roleAuth } = require('../middleware/auth.middleware') ;
 const { applyLeave, reviewLeave, getLeaveDetails, getAllLeaveDetails } = require('../controllers/leaveController') ;

@@ -5,7 +5,8 @@ const { authRateLimit } = require("../middleware/rateLimiter.middleware");
 const authRouter = express.Router() ;
 
 authRouter.post("/register" , registerUser) ;
-authRouter.post("/login" , authRateLimit , login) ;
+// authRouter.post("/login" , authRateLimit , login) ;
+authRouter.post("/login" , login) ;
 authRouter.post("/logout", logout) ;
 
 module.exports = authRouter ;

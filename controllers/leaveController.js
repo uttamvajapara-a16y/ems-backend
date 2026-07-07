@@ -23,7 +23,7 @@ const applyLeave = async (req, res, next) => {
             status: { $in: ["pending", "approved"] }, 
             startDate: { $lte: newEnd },
             endDate: { $gte: newStart },
-        });
+        }); 
 
         if (overlappingLeave) {
             return res.status(409).json({

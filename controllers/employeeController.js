@@ -1,5 +1,8 @@
 const Employee = require("../models/employee");
-const cloudinary = require("../config/cloudinary") ;
+const cloudinary = require("../config/cloudinary");
+const Attendance = require("../models/attendance");
+const Leave = require("../models/leave")
+const Payroll = require("../models/payroll");
 
 const getEmployees = async (req, res, next) => {
     try {
@@ -73,11 +76,11 @@ const getEmployeeById = async (req, res, next) => {
     }
 }
 
-const updateEmployee = async (req , res , next) => {
-    try{
-        const allowedUpdates = ["firstName", "lastName", "emailId", "age", "gender", "profileImage", "departmentId", "managerId" , "designation" , "salary" , "status"] ;
+const updateEmployee = async (req, res, next) => {
+    try {
+        const allowedUpdates = ["firstName", "lastName", "emailId", "age", "gender", "profileImage", "departmentId", "managerId", "designation", "salary", "status"];
 
-        const isEditValid = Object.keys(req.body).every(field => allowedUpdates.includes(field)) ;
+        const isEditValid = Object.keys(req.body).every(field => allowedUpdates.includes(field));
 
         let profileImage = '';
         if (req.file) {
@@ -85,11 +88,11 @@ const updateEmployee = async (req , res , next) => {
             profileImage = result.secure_url;
         }
 
-        if(!isEditValid){
-            throw new Error ("update not valid") ;
+        if (!isEditValid) {
+            throw new Error("update not valid");
         } else {
-            const {id} = req.params ;
-            const emp = await Employee.findByIdAndUpdate(id , req.body , {runValidators: true , returnDocument: "after"}).select("-password") ;
+            const { id } = req.params;
+            const emp = await Employee.findByIdAndUpdate(id, req.body, { runValidators: true, returnDocument: "after" }).select("-password");
             return res.status(200).json({
                 success: true,
                 message: "employee updated successfully",
@@ -97,8 +100,8 @@ const updateEmployee = async (req , res , next) => {
             })
         }
 
-    } catch (err){
-        next(err) ;
+    } catch (err) {
+        next(err);
     }
 }
 
@@ -117,18 +120,72 @@ const deleteEmployee = async (req, res, next) => {
     }
 }
 
-const getProfile = async (req , res , next) => {
-    try{
-        const employee = req.employee ;
-        if(!employee) return res.status(404).json({success: false , message: "employee not found"}) ;
+const getProfile = async (req, res, next) => {
+    try {
+        const employee = req.employee;
+        if (!employee) return res.status(404).json({ success: false, message: "employee not found" });
         res.status(200).json({
             success: true,
             message: "request successfull",
             data: employee
         })
     } catch (err) {
-        next(err) ;
+        next(err);
     }
 }
 
-module.exports = { getEmployees, getEmployeeById, deleteEmployee, updateEmployee, getProfile };
+const getEmployeeStats = async (req, res, next) => {
+    try {
+        const employeeId = req.user._id;
+
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+
+        const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+        const endOfMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0, 23, 59, 59);
+
+        const [todayAttendance, monthlyAttendance, recentLeaves, latestPayslip] = await Promise.all([
+            // today's attendance record, to check checked-in/checked-out status
+            Attendance.findOne({ employeeId, date: today }),
+
+            // this month's attendance records, to compute present/absent counts
+            Attendance.find({
+                employeeId,
+                date: { $gte: startOfMonth, $lte: endOfMonth },
+            }),
+
+            // last 3 leave requests, most recent first
+            Leave.find({ applierId: employeeId })
+                .sort({ createdAt: -1 })
+                .limit(3),
+
+            // most recent payslip (by year, then month)
+            Payroll.findOne({ employeeId })
+                .sort({ year: -1, month: -1 }),
+        ]);
+
+        const presentDays = monthlyAttendance.filter((a) => a.status === "present").length;
+        const absentDays = monthlyAttendance.filter((a) => a.status === "absent").length;
+        const halfDays = monthlyAttendance.filter((a) => a.status === "half-day").length;
+
+        res.status(200).json({
+            success: true,
+            data: {
+                checkedInToday: !!todayAttendance?.checkIn,
+                checkedOutToday: !!todayAttendance?.checkOut,
+                monthlyAttendance: {
+                    presentDays,
+                    absentDays,
+                    halfDays,
+                    totalMarked: monthlyAttendance.length,
+                },
+                recentLeaves,
+                latestPayslip,
+            },
+        });
+    } catch (err) {
+        next(err);
+    }
+}
+
+module.exports = { getEmployees, getEmployeeById, deleteEmployee, updateEmployee, getProfile, getEmployeeStats };

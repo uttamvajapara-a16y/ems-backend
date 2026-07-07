@@ -17,7 +17,7 @@ const employeeAuth = async (req, res, next) => {
         if (!employee) {
             throw new Error("User not found");
         }
-        req.employee = employee;
+        req.user = employee;
         next()
     } catch (err) {
         if (err.name === "TokenExpiredError") {
