@@ -3,6 +3,7 @@ const Attendance = require("../models/attendance");
 const HR = require('../models/hr');
 const Leave = require("../models/leave");
 const Department = require("../models/department");
+const Payroll = require("../models/payroll");
 
 const getStats = async (req, res, next) => {
     try {
@@ -108,4 +109,59 @@ const getStats = async (req, res, next) => {
     }
 };
 
-module.exports = { getStats };
+const myAttendance = async (req, res, next) => {
+    try {
+        const { _id, role } = req.user;
+
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+
+        const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+        const endOfMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0, 23, 59, 59);
+
+        const [todayAttendance, monthlyAttendance, recentLeaves] = await Promise.all([
+            // today's attendance record, to check checked-in/checked-out status
+            Attendance.findOne({ employeeId: _id , date: today }),
+
+            // this month's attendance records, to compute present/absent counts
+            Attendance.find({
+                employeeId: _id,
+                date: { $gte: startOfMonth, $lte: endOfMonth },
+            }),
+
+            // last 3 leave requests, most recent first
+            Leave.find({ applierId: _id })
+                .sort({ createdAt: -1 })
+                .limit(3),
+        ]);
+
+        let latestPayslip;
+
+        if (role === "HR")
+            latestPayslip = await Payroll.findOne({ employeeId: _id }).sort({ year: -1, month: -1 });
+
+        const presentDays = monthlyAttendance.filter((a) => a.status === "present").length;
+        const absentDays = monthlyAttendance.filter((a) => a.status === "absent").length;
+        const halfDays = monthlyAttendance.filter((a) => a.status === "half-day").length;
+
+        res.status(200).json({
+            success: true,
+            data: {
+                checkedInToday: !!todayAttendance?.checkIn,
+                checkedOutToday: !!todayAttendance?.checkOut,
+                monthlyAttendance: {
+                    presentDays,
+                    absentDays,
+                    halfDays,
+                    totalMarked: monthlyAttendance.length,
+                },
+                recentLeaves,
+                latestPayslip,
+            },
+        });
+    } catch (err) {
+        next(err);
+    }
+}
+ 
+module.exports = { getStats, myAttendance };

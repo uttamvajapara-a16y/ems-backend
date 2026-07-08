@@ -30,7 +30,7 @@ const checkIn = async (req, res, next) => {
         const attendance = new Attendance({
             employeeId: _id,
             checkIn: new Date(),
-            date: today,
+            date: today, 
             departmentId: departmentId,
             attenderModel: emp.role
         })

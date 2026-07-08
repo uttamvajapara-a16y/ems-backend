@@ -1,7 +1,7 @@
 const express = require('express') ;
 const {employeeAuth, userAuth, roleAuth, adminAuth} = require('../middleware/auth.middleware') ;
 const { checkIn, checkOut, getAttendance, getAttendanceReport } = require('../controllers/attendanceController');
-
+ 
 const attendanceRouter = express.Router() ;
 
 attendanceRouter.post("/attendance/checkin" , userAuth , checkIn) ;
