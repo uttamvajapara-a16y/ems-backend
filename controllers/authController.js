@@ -43,14 +43,14 @@ const registerUser = async (req, res, next) => {
             // const token = await savedHr.getJWT();
             // res.cookie("token", token, { httpOnly: true, maxAge: 10 * 60 * 60 * 1000 });
             // res.json({ message: "HR added successfully", data: savedHr });
-        } else if(role === "Admin") {
+        } else if (role === "Admin") {
             const admin = new Admin({
                 firstName,
                 lastName,
                 emailId,
                 password: passwordHash,
             })
-            console.log(admin) ;
+            console.log(admin);
             const savedAdmin = await admin.save();
 
             res.status(201).json({
@@ -75,20 +75,22 @@ const login = async (req, res, next) => {
         if (role === "Employee") {
 
             const employee = await Employee.findOne({ emailId });
-            if (!employee) return res.status(400).json({success: false , message: "invalid credentials"})
+            if (!employee) return res.status(400).json({ success: false, message: "invalid credentials" })
 
             const isPasswordValid = await employee.validatePassword(password);
 
             if (isPasswordValid) {
-                await employee.populate("departmentId", "departmentName").select("-password") ;
+                await employee.populate("departmentId", "departmentName");
                 const token = await employee.getJWT();
                 res.cookie("token", token, { httpOnly: true, maxAge: 10 * 60 * 60 * 1000 });
-                res.send(employee);
+                const employeeObj = employee.toObject();
+                delete employeeObj.password;
+                res.send(employeeObj);
             } else
-                return res.status(400).json({success: false , message: "invalid credentials"})
+                return res.status(400).json({ success: false, message: "invalid credentials" })
         } else if (role === "HR") {
             const hr = await HR.findOne({ emailId });
-            if (!hr) return res.status(400).json({success: false , message: "invalid credentials"})
+            if (!hr) return res.status(400).json({ success: false, message: "invalid credentials" })
 
             const isPasswordValid = await hr.validatePassword(password);
 
@@ -97,18 +99,18 @@ const login = async (req, res, next) => {
                 res.cookie("token", token, { httpOnly: true, maxAge: 10 * 60 * 60 * 1000 });
                 res.send(hr);
             } else
-                return res.status(400).json({success: false , message: "invalid credentials"})
+                return res.status(400).json({ success: false, message: "invalid credentials" })
         } else if (role === "Admin") {
             const admin = await Admin.findOne({ emailId });
-            if (!admin) return res.status(400).json({success: false , message: "invalid credentials"})
+            if (!admin) return res.status(400).json({ success: false, message: "invalid credentials" })
 
             const isPasswordValid = await admin.validatePassword(password);
-            if (!isPasswordValid) return res.status(400).json({success: false , message: "invalid credentials"})
+            if (!isPasswordValid) return res.status(400).json({ success: false, message: "invalid credentials" })
             const token = await admin.getJWT();
             res.cookie("token", token, { httpOnly: true, maxAge: 10 * 60 * 60 * 1000 });
             res.send(admin);
         } else {
-            return res.status(400 ).json({ message: "please provide valid role" })
+            return res.status(400).json({ message: "please provide valid role" })
         }
     } catch (err) {
         next(err);

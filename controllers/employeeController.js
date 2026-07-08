@@ -4,6 +4,88 @@ const Attendance = require("../models/attendance");
 const Leave = require("../models/leave")
 const Payroll = require("../models/payroll");
 
+// const getEmployees = async (req, res, next) => {
+//     try {
+//         const {
+//             page = 1,
+//             limit = 10,
+//             department,
+//             status,
+//             search,
+//             sortBy = "createdAt",
+//             sortOrder = "desc",
+//             attendance
+//         } = req.query;
+
+//         const filter = {};
+//         if (department) filter.departmentName = department;
+//         if (status) filter.status = status;
+//         if (search) {
+//             filter.$or = [
+//                 { firstName: { $regex: search, $options: "i" } },
+//                 { lastName: { $regex: search, $options: "i" } },
+//                 { emailId: { $regex: search, $options: "i" } },
+//                 { designation: { $regex: search, $options: "i" } },
+//             ]
+//         }
+
+//         // pagination
+//         const pageNum = Math.max(Number(page), 1);
+//         const limitNum = Math.min(Number(limit), 100);
+//         const skip = (pageNum - 1) * limitNum;
+
+
+//         const [employees, totalCount] = await Promise.all([
+//             Employee.find(filter)
+//                 .select("-password")
+//                 .populate("departmentId", "departmentName")
+//                 .sort({ [sortBy]: sortOrder === "asc" ? 1 : -1 })
+//                 .skip(skip)
+//                 .limit(limitNum),
+//             Employee.countDocuments(filter)
+//         ])
+//         if (employees.length === 0) return res.status(200).json({ message: "no employees found", employees: [] });
+
+
+//         const today = new Date();
+//         today.setHours(0, 0, 0, 0);
+
+//         const records = await Attendance.find({ date: today }).select("employeeId status");
+
+//         const map = {};
+//         records.forEach((r) => {
+//             map[r.employeeId.toString()] = r.status;
+//         });
+
+//         const employeesWithStatus = employees.map((emp) => {
+//             const empObj = emp.toObject(); // convert Mongoose document to plain object so we can add a new field
+//             empObj.todayStatus = map[emp._id.toString()] || "not-marked";
+//             return empObj;
+//         });
+
+//         const presentEmployees = employeesWithStatus.filter(
+//             emp => emp.todayStatus === attendance
+//         );
+
+//         console.log(presentEmployees);
+
+//         res.status(200).json({
+//             success: true,
+//             message: "request successfull",
+//             employeesCount: employees.length,
+//             data: employeesWithStatus,
+//             pagination: {
+//                 totalCount,
+//                 totalPages: Math.ceil(totalCount / limitNum),
+//                 currentPage: pageNum,
+//                 limit: limitNum
+//             }
+//         })
+//     } catch (err) {
+//         next(err);
+//     }
+// }
+
 const getEmployees = async (req, res, next) => {
     try {
         const {
@@ -13,11 +95,12 @@ const getEmployees = async (req, res, next) => {
             status,
             search,
             sortBy = "createdAt",
-            sortOrder = "desc"
+            sortOrder = "desc",
+            attendance
         } = req.query;
 
         const filter = {};
-        if (department) filter.department = department;
+        if (department) filter.departmentName = department;
         if (status) filter.status = status;
         if (search) {
             filter.$or = [
@@ -25,7 +108,27 @@ const getEmployees = async (req, res, next) => {
                 { lastName: { $regex: search, $options: "i" } },
                 { emailId: { $regex: search, $options: "i" } },
                 { designation: { $regex: search, $options: "i" } },
-            ]
+            ];
+        }
+
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+
+        // --- dynamic attendance filter ---
+        if (attendance) {
+            const todayRecords = await Attendance.find({ date: today }).select("employeeId status");
+
+            if (attendance === "not-marked") {
+                // employees with NO attendance record today
+                const markedIds = todayRecords.map(r => r.employeeId);
+                filter._id = { $nin: markedIds };
+            } else {
+                // employees whose today's status matches
+                const matchedIds = todayRecords
+                    .filter(r => r.status === attendance)
+                    .map(r => r.employeeId);
+                filter._id = { $in: matchedIds };
+            }
         }
 
         // pagination
@@ -33,33 +136,47 @@ const getEmployees = async (req, res, next) => {
         const limitNum = Math.min(Number(limit), 100);
         const skip = (pageNum - 1) * limitNum;
 
-
         const [employees, totalCount] = await Promise.all([
             Employee.find(filter)
                 .select("-password")
-                .populate("departmentId", "name")
+                .populate("departmentId", "departmentName")
                 .sort({ [sortBy]: sortOrder === "asc" ? 1 : -1 })
                 .skip(skip)
                 .limit(limitNum),
             Employee.countDocuments(filter)
-        ])
-        if (employees.length === 0) return res.status(200).json({ message: "no employees found", employees: [] });
+        ]);
+
+        if (employees.length === 0) {
+            return res.status(200).json({ message: "no employees found", employees: [] });
+        }
+
+        // attach todayStatus to just this page's employees
+        const records = await Attendance.find({ date: today }).select("employeeId status");
+        const map = {};
+        records.forEach((r) => { map[r.employeeId.toString()] = r.status; });
+
+        const employeesWithStatus = employees.map((emp) => {
+            const empObj = emp.toObject();
+            empObj.todayStatus = map[emp._id.toString()] || "not-marked";
+            return empObj;
+        });
+
         res.status(200).json({
             success: true,
             message: "request successfull",
-            employeesCount: employees.length,
-            data: employees,
+            employeesCount: employeesWithStatus.length,
+            data: employeesWithStatus,
             pagination: {
                 totalCount,
                 totalPages: Math.ceil(totalCount / limitNum),
                 currentPage: pageNum,
                 limit: limitNum
             }
-        })
+        });
     } catch (err) {
         next(err);
     }
-}
+};
 
 const getEmployeeById = async (req, res, next) => {
     try {

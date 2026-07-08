@@ -109,33 +109,55 @@ const getAttendance = async (req, res, next) => {
 
 const getAttendanceReport = async (req, res, next) => {
     try {
-        const { department, month, year } = req.query;
+        const { department, month, year, date } = req.query;
         const filter = {};
-        if (department) filter.departmentId = department;
-        if (month && year) {
+        filter.employeeId = {$nin: req.user._id}
+
+        if (date) {
+            // specific single-day filter
+            const startDate = new Date(date);
+            startDate.setHours(0, 0, 0, 0);
+            const endDate = new Date(date);
+            endDate.setHours(23, 59, 59, 999);
+            filter.date = { $gte: startDate, $lte: endDate };
+        } else if (month && year) {
+            // month/year range filter
             const startDate = new Date(year, month - 1, 1);
             startDate.setHours(0, 0, 0, 0);
             const endDate = new Date(year, month, 0);
             endDate.setHours(23, 59, 59, 999);
-            filter.date = { $gte: startDate, $lte: endDate }
+            filter.date = { $gte: startDate, $lte: endDate };
+        } else {
+            // default: today only
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            const endOfToday = new Date();
+            endOfToday.setHours(23, 59, 59, 999);
+            filter.date = { $gte: today, $lte: endOfToday };
         }
 
-        const attendance = await Attendance.find(filter)
-            .populate("employeeId", "firstName lastName emailId")
+        let attendance = await Attendance.find(filter)
+            .populate("employeeId", "firstName lastName emailId departmentId")
             .populate("departmentId", "departmentName")
+            .sort({ date: -1 });
 
-        if (attendance.length === 0) return res.status(400).json({ success: false, message: "no attendance record found" })
+        // department filter applied AFTER populate, since department lives on Employee, not Attendance
+        if (department) {
+            attendance = attendance.filter(
+                (a) => a.employeeId?.departmentId?.toString() === department
+            );
+        }
 
         res.status(200).json({
             success: true,
             message: "report generated",
-            data: attendance
-        })
-
+            count: attendance.length,
+            data: attendance,
+        });
     } catch (err) {
         next(err);
     }
-}
+};
 
 module.exports = { checkIn, checkOut, getAttendance, getAttendanceReport };
 

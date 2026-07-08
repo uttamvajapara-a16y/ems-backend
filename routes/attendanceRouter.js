@@ -7,6 +7,6 @@ const attendanceRouter = express.Router() ;
 attendanceRouter.post("/attendance/checkin" , userAuth , checkIn) ;
 attendanceRouter.post("/attendance/checkout" , userAuth , checkOut) ;
 attendanceRouter.get("/attendance/get" , userAuth , getAttendance) ;
-attendanceRouter.get("/attendance/getReport" , adminAuth , getAttendanceReport) ;
+attendanceRouter.get("/attendance/getReport" , roleAuth , getAttendanceReport) ;
 
 module.exports = attendanceRouter ;
