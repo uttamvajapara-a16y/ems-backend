@@ -111,6 +111,10 @@ const getEmployees = async (req, res, next) => {
             ];
         }
 
+        // if(req.user.role === "HR"){
+        //     filter.department = {$in: [req.user.departmentName]} ;
+        // }
+
         const today = new Date();
         today.setHours(0, 0, 0, 0);
 

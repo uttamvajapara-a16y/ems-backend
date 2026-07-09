@@ -15,6 +15,10 @@ const leaveSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         required: true
     },
+    departmentName: {
+        type: String,
+        required: true
+    } ,
     role: {
         type: String,
         required: true,

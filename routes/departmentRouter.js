@@ -11,4 +11,4 @@ departmentRouter.get('/department/get/:id', userAuth, getDepartmentById) ;
 departmentRouter.put('/department/update/:id', adminAuth, updateDepartmentById) ;
 departmentRouter.delete('/department/delete/:id', adminAuth, deleteDepartmentById) ;
 
-module.exports = departmentRouter ;
+module.exports = departmentRouter ; 

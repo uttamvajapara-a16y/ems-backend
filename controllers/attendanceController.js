@@ -32,7 +32,7 @@ const checkIn = async (req, res, next) => {
             checkIn: new Date(),
             date: today, 
             departmentId: departmentId,
-            attenderModel: emp.role
+            attenderModel: emp.role || "Employee"
         })
         const savedAttendance = await attendance.save();
         res.status(201).send({ success: true, message: "check in successful", data: savedAttendance });
@@ -136,15 +136,26 @@ const getAttendanceReport = async (req, res, next) => {
             filter.date = { $gte: today, $lte: endOfToday };
         }
 
-        let attendance = await Attendance.find(filter)
-            .populate("employeeId", "firstName lastName emailId departmentId")
-            .populate("departmentId", "departmentName")
-            .sort({ date: -1 });
+        const HR = require("../models/hr");
+
+        const [employeeAttendance, hrAttendance] = await Promise.all([
+            Attendance.find({ ...filter, attenderModel: "Employee" })
+                .populate({ path: "employeeId", select: "firstName lastName emailId departmentId profileImage departmentName role", model: "Employee" })
+                .populate("departmentId", "departmentName")
+                .sort({ date: -1 }),
+            Attendance.find({ ...filter, attenderModel: "HR" })
+                .populate({ path: "employeeId", select: "firstName lastName emailId departmentId profileImage departmentName role", model: "HR" })
+                .populate("departmentId", "departmentName")
+                .sort({ date: -1 })
+        ]);
+
+        let attendance = [...employeeAttendance, ...hrAttendance]
+            .sort((a, b) => new Date(b.date) - new Date(a.date));
 
         // department filter applied AFTER populate, since department lives on Employee, not Attendance
         if (department) {
             attendance = attendance.filter(
-                (a) => a.employeeId?.departmentId?.toString() === department
+                (a) => a.employeeId?.departmentName === department
             );
         }
 

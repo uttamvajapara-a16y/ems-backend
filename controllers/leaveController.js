@@ -95,7 +95,7 @@ const reviewLeave = async (req, res, next) => {
         leave.reviewerModel = req.user.role;
 
         await leave.save();
-        res.status(201).json({ success: true, message: `${status} successfully` });
+        res.status(200).json({ success: true, message: `${status} successfully` });
 
     } catch (err) {
         next(err);
@@ -149,7 +149,7 @@ const getAllLeaveDetails = async (req, res, next) => {
         const { department, role, applierId, startDate, endDate, leaveType, status, reviewerId, page = 1, limit = 10 } = req.query;
 
         const filter = {};
-        if (department) filter.department = department;
+        if (department) filter.departmentName = department;
         if (applierId) filter.applierId = applierId;
         if (startDate) filter.startDate = { ...filter.startDate, $gte: new Date(startDate) };
         if (endDate) filter.endDate = { ...filter.endDate, $lte: new Date(endDate) };
@@ -158,11 +158,15 @@ const getAllLeaveDetails = async (req, res, next) => {
         if (reviewerId) filter.reviewerId = reviewerId;
         if (role) filter.role = role;
 
+        if(req.user.role === "HR"){
+            filter.departmentName = req.user.departmentName ;
+        }
+
         const skip = (Number(page) - 1) * Number(limit);
 
         const [leaves, totalCount] = await Promise.all([
             Leave.find(filter)
-                .populate("applierId", "firstName lastName emailId role")
+                .populate("applierId", "firstName lastName emailId role profileImage")
                 .sort({ createdAt: -1 })
                 .skip(skip)
                 .limit(Number(limit)),

@@ -80,7 +80,7 @@ const getStats = async (req, res, next) => {
             Leave.find({ status: "pending" })
                 .sort({ createdAt: -1 })
                 .limit(5)
-                .populate("applierId", "firstName lastName role"),
+                .populate("applierId", "firstName lastName role profileImage"),
         ])
 
         const attendanceToday = { present: 0, absent: 0, "half-day": 0, leave: 0 };

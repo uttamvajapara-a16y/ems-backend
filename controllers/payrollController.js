@@ -13,7 +13,7 @@ const generatePayroll = async (req, res, next) => {
         const validDates = validatePayrollMonth(month, year) ;
 
         if(!validDates.valid){
-            res.status(400).json({
+            return res.status(400).json({
                 success: false, message: validDates.message 
             })
         }
@@ -53,7 +53,7 @@ const generatePayrollHr = async (req , res , next) => {
         const validDates = validatePayrollMonth(month, year) ;
 
         if(!validDates.valid){
-            res.status(400).json({
+            return res.status(400).json({
                 success: false, message: validDates.message 
             })
         }
@@ -66,13 +66,13 @@ const generatePayrollHr = async (req , res , next) => {
         const deductions = await calculateDeductions(hrId, month, year, basicSalary);
 
         const payroll = await Payroll.create({
-            hrId,
+            employeeId:hrId,
             month,
             year,
             basicSalary,
             allowances,
             deductions,
-            eployeeModel: "HR",
+            employeeModel: "HR",
             generatedBy: req.user._id,
             generatorModel: "Admin",
         });
@@ -91,7 +91,7 @@ const generateBulkPayroll = async (req, res, next) => {
         const validDates = validatePayrollMonth(month, year) ;
         
         if(!validDates.valid){
-            res.status(400).json({
+            return res.status(400).json({
                 success: false, message: validDates.message 
             })
         }
@@ -112,7 +112,7 @@ const generateBulkPayroll = async (req, res, next) => {
                 basicSalary: emp.salary,
                 deductions,
                 generatedBy: req.user._id,
-                eployeeModel: emp.role ,
+                employeeModel: emp.role ,
                 generatorModel: req.user.role
             });
             results.push(payroll);
@@ -132,7 +132,7 @@ const generateBulkPayrollHr = async (req, res, next) => {
         const validDates = validatePayrollMonth(month, year) ;
         
         if(!validDates.valid){
-            res.status(400).json({
+            return res.status(400).json({
                 success: false, message: validDates.message 
             })
         }
@@ -153,7 +153,7 @@ const generateBulkPayrollHr = async (req, res, next) => {
                 basicSalary: hr.salary,
                 deductions,
                 generatedBy: req.user._id,
-                eployeeModel: hr.role ,
+                employeeModel: hr.role ,
                 generatorModel: "Admin"
             });
             results.push(payroll);
