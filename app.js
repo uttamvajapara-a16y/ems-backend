@@ -16,6 +16,7 @@ const dashboardRouter = require("./routes/dashboardRouter");
 const adminRouter = require("./routes/adminRouter");
 const payrollRouter = require("./routes/payrollRouter");
 const profileRouter = require("./routes/profileRouter");
+const hrRouter = require("./routes/hrRouter");
 
 
 const app = express();
@@ -41,6 +42,7 @@ app.use('/api' , dashboardRouter) ;
 app.use("/api" , adminRouter) ;
 app.use("/api" , payrollRouter) ;
 app.use("/api" , profileRouter) ;
+app.use("/api" , hrRouter) ;
 
 
 app.use(errorHandler) ;

@@ -11,12 +11,11 @@ const getHr = async (req, res, next) => {
         if (departmentId) filter.departmentId = departmentId;
         if (status) filter.status = status;
 
-        const hrs = HR.find(filter)
+        const hrs = await HR.find(filter)
             .select("-password")
-            .populate("departmentId", "departmentName")
-            .sort({ [sortBy]: sortOrder === "asc" ? 1 : -1 })
+            .sort({ [sortBy]: sortOrder === "asc" ? 1 : -1 });
 
-        if (hrs.length === 0) return res.status(200).json({ message: "no hrs found", hrs: [] });
+        if (hrs.length === 0) return res.status(200).json({ message: "no hrs found", data: [] });
 
         res.status(200).json({
             success: true,
