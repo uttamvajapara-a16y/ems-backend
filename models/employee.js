@@ -105,8 +105,8 @@ const employeeSchema = new mongoose.Schema({
     },
     Address: {
         type: String ,
-        minLength: 10 ,
-        maxLength: 100
+        minLength: [10, "enter adress more than 10 characters"] ,
+        maxLength: [100 , "Address can not be more than 100 characters"]
     }
 }, {
     timestamps: true

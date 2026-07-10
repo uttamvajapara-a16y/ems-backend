@@ -1,31 +1,129 @@
 const HR = require("../models/hr");
+const Attendance = require("../models/attendance") ;
+
+// const getHr = async (req, res, next) => {
+//     try {
+//         const { emailId, age, gender, departmentId, status, sortBy = "createdAt", sortOrder = "desc"} = req.query;
+
+//         const filter = {};
+//         if (emailId) filter.emailId = emailId;
+//         if (age) filter.age = age;
+//         if (gender) filter.gender = gender;
+//         if (departmentId) filter.departmentId = departmentId;
+//         if (status) filter.status = status;
+
+
+
+//         const hrs = await HR.find(filter)
+//             .select("-password")
+//             .sort({ [sortBy]: sortOrder === "asc" ? 1 : -1 });
+
+//         if (hrs.length === 0) return res.status(200).json({ message: "no hrs found", data: [] });
+
+//         res.status(200).json({
+//             success: true,
+//             message: "request successfull",
+//             data: hrs
+//         })
+//     } catch (err) {
+//         next(err) ;
+//     }
+// }
 
 const getHr = async (req, res, next) => {
     try {
-        const { emailId, age, gender, departmentId, status, sortBy = "createdAt", sortOrder = "desc"} = req.query;
+        const {
+            page = 1,
+            limit = 10,
+            department,
+            status,
+            search,
+            sortBy = "createdAt",
+            sortOrder = "desc",
+            attendance
+        } = req.query;
 
         const filter = {};
-        if (emailId) filter.emailId = emailId;
-        if (age) filter.age = age;
-        if (gender) filter.gender = gender;
-        if (departmentId) filter.departmentId = departmentId;
+        if (department) filter.departmentName = department;
         if (status) filter.status = status;
+        if (search) {
+            filter.$or = [
+                { firstName: { $regex: search, $options: "i" } },
+                { lastName: { $regex: search, $options: "i" } },
+                { emailId: { $regex: search, $options: "i" } },
+            ];
+        }
 
-        const hrs = await HR.find(filter)
-            .select("-password")
-            .sort({ [sortBy]: sortOrder === "asc" ? 1 : -1 });
+        // if(req.user.role === "HR"){
+        //     filter.department = {$in: [req.user.departmentName]} ;
+        // }
 
-        if (hrs.length === 0) return res.status(200).json({ message: "no hrs found", data: [] });
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+
+        // --- dynamic attendance filter ---
+        if (attendance) {
+            const todayRecords = await Attendance.find({ date: today }).select("employeeId status");
+
+            if (attendance === "not-marked") {
+                // employees with NO attendance record today
+                const markedIds = todayRecords.map(r => r.employeeId);
+                filter._id = { $nin: markedIds };
+            } else {
+                // employees whose today's status matches
+                const matchedIds = todayRecords
+                    .filter(r => r.status === attendance)
+                    .map(r => r.employeeId);
+                filter._id = { $in: matchedIds };
+            }
+        }
+
+        // pagination
+        const pageNum = Math.max(Number(page), 1);
+        const limitNum = Math.min(Number(limit), 100);
+        const skip = (pageNum - 1) * limitNum;
+
+        const [hrs, totalCount] = await Promise.all([
+            HR.find(filter)
+                .select("-password")
+                .sort({ [sortBy]: sortOrder === "asc" ? 1 : -1 })
+                .skip(skip)
+                .limit(limitNum),
+            HR.countDocuments(filter)
+        ]);  
+
+        if (hrs.length === 0) {
+            return res.status(200).json({ message: "no hrs found", hrs: [] });
+        }
+
+        // attach todayStatus to just this page's employees
+        const records = await Attendance.find({ date: today }).select("employeeId status");
+        const map = {};
+        records.forEach((r) => { map[r.employeeId.toString()] = r.status; });
+
+        const employeesWithStatus = hrs.map((emp) => {
+            const empObj = emp.toObject();
+            empObj.todayStatus = map[emp._id.toString()] || "not-marked";
+            return empObj;
+        });
+        // console.log(employeesWithStatus) ;
 
         res.status(200).json({
             success: true,
             message: "request successfull",
-            data: hrs
-        })
+            employeesCount: employeesWithStatus.length,
+            data: employeesWithStatus,
+            pagination: {
+                totalCount,
+                totalPages: Math.ceil(totalCount / limitNum),
+                currentPage: pageNum,
+                limit: limitNum
+            }
+        });
     } catch (err) {
-        next(err) ;
+        next(err);
     }
-}
+};
 
 const getHrById = async (req, res, next) => {
     try {

@@ -201,7 +201,7 @@ const updateEmployee = async (req, res, next) => {
     try {
         const allowedUpdates = ["firstName", "lastName", "emailId", "age", "phone", "gender", "profileImage", "departmentId", "managerId", "designation", "salary", "status", "Address"];
 
-        const isEditValid = Object.keys(req.body).every(field => allowedUpdates.includes(field));
+        const isEditValid = req.user.role === "Admin" ? true : Object.keys(req.body).every(field => allowedUpdates.includes(field));
 
         // console.log(req.file);
 
