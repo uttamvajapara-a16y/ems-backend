@@ -16,4 +16,4 @@ employeeRouter.put("/employee/update/:id", userAuth, upload.single("profileImage
 employeeRouter.delete("/employee/delete/:id", roleAuth, deleteEmployee) ;
 employeeRouter.get("/employees/:id", roleAuth, getEmployeeById) ;
 
-module.exports = employeeRouter ;
+module.exports = employeeRouter ; 

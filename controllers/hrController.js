@@ -44,14 +44,16 @@ const getHrById = async (req, res, next) => {
 
 const updateHr = async (req , res , next) => {
     try{
+        console.log(req.body) ;
         const allowedUpdates = ["firstName", "lastName", "emailId", "age", "gender", "profileImage", "departmentId", "managerId" , 
-            "designation" , "salary" , "status"];
-        const isEditValid = Object.keys(req.body).every(field => allowedUpdates.includes(field)) ;
+            "designation" , "phone" , "Address" , "salary" , "status"];
+        const isEditValid = Object.keys(req.body).every(field => allowedUpdates.includes(field)) ; 
+
         if(!isEditValid){
-            throw new Error ("update not valid") ;
+            return res.status(400).json({success: false, message: "update not valid"}) ;
         } else {
             const {id} = req.params ;
-            const hr = await HR.findByIdAndUpdate(id , req.body , {new: true , runValidators: true}).select("-password") ;
+            const hr = await HR.findByIdAndUpdate(id , req.body , {new: true , runValidators: true, returnDocument: "after"}).select("-password") ;
             return res.status(200).json({
                 success: true,
                 message: "hr updated successfully",
