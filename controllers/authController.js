@@ -7,42 +7,42 @@ const bcrypt = require("bcrypt");
 
 const registerUser = async (req, res, next) => {
     try {
-        validateSignup(req);
-        const { password, firstName, lastName, emailId, role } = req.body;
+        // validateSignup(req);
+        const { password, firstName, lastName, emailId, role, departmentName, designation, dateOfJoining, salary } = req.body;
         const passwordHash = await bcrypt.hash(password, 12);
 
-        if (role === "employee") {
+        if (role === "Employee") {
             const employee = new Employee({
                 firstName,
                 lastName,
                 emailId,
                 password: passwordHash,
-                status: "active"
+                status: "active",
+                departmentName,
+                designation,
+                dateOfJoining,
+                salary
             })
 
             const savedEmployee = await employee.save();
 
-            if (req.user) return res.json({ message: "employee added successfully", data: savedEmployee });
+            return res.status(201).json({ success: true, message: "employee added successfully", data: savedEmployee });
 
-            // const token = await savedEmployee.getJWT();
-            // res.cookie("token", token, { httpOnly: true, maxAge: 10 * 60 * 60 * 1000 });
-            // res.json({ message: "employee added successfully", data: savedEmployee });
         } else if (role === 'HR') {
             const hr = new HR({
                 firstName,
                 lastName,
                 emailId,
                 password: passwordHash,
-                status: "active"
+                status: "active",
+                departmentName,
+                dateOfJoining,
+                salary
             })
 
             const savedHr = await hr.save();
 
-            if (req.user) return res.json({ message: "HR added successfully", data: savedHr });
-
-            // const token = await savedHr.getJWT();
-            // res.cookie("token", token, { httpOnly: true, maxAge: 10 * 60 * 60 * 1000 });
-            // res.json({ message: "HR added successfully", data: savedHr });
+            return res.status(201).json({ success: true, message: "HR added successfully", data: savedHr });
         } else if (role === "Admin") {
             const admin = new Admin({
                 firstName,
@@ -53,7 +53,7 @@ const registerUser = async (req, res, next) => {
             console.log(admin);
             const savedAdmin = await admin.save();
 
-            res.status(201).json({
+            return res.status(201).json({
                 success: true,
                 message: "Admin added successfully",
                 data: savedAdmin

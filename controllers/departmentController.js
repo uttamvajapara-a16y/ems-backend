@@ -2,8 +2,8 @@ const Department = require("../models/department") ;
 
 const createDepartment = async (req, res, next) => {
     try{
-        const {departmentName , description , headId} = req.body ;
-        const department = new Department({departmentName , description , headId}) ;
+        const {departmentName , description , headName} = req.body ;
+        const department = new Department({departmentName , description , headName}) ;
         const savedDepartment = await department.save() ;
         res.status(201).json({message: "department created successfully", data: savedDepartment}) ;
     } catch (err){

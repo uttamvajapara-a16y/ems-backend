@@ -72,9 +72,7 @@ const hrSchema = new mongoose.Schema({
     } ,
     dateOfJoining: {
         type: Date ,
-        validate(value){
-            if(value > new Date()) throw new Error("date of joining can not be future date") ;
-        }
+        required: true
     } , 
     salary: {
         type: Number ,

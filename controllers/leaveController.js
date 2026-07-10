@@ -50,6 +50,7 @@ const applyLeave = async (req, res, next) => {
             applierModel: user.role,
             status: "pending",
             departmentId: user.departmentId,
+            departmentName: user.departmentName,
             role: user.role
         })
         const savedLeave = await leave.save();
@@ -160,6 +161,7 @@ const getAllLeaveDetails = async (req, res, next) => {
 
         if(req.user.role === "HR"){
             filter.departmentName = req.user.departmentName ;
+            filter.role = { $ne: "HR" } ;
         }
 
         const skip = (Number(page) - 1) * Number(limit);

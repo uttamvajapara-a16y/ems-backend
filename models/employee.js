@@ -78,18 +78,18 @@ const employeeSchema = new mongoose.Schema({
     },
     designation: {
         type: String,
+        required: true ,
         validate(value) {
-            if (!["jr.developer", "sr.developer", "teamleader", "manager", "HR"].includes(value)) throw new Error("enter valid designation");
+            if (!["jr.developer", "sr.developer", "teamleader"].includes(value)) throw new Error("enter valid designation");
         }
     },
     dateOfJoining: {
         type: Date,
-        validate(value) {
-            if (value > new Date()) throw new Error("date of joining can not be future date");
-        }
+        required: true ,
     },
     salary: {
         type: Number,
+        require: true ,
         validate(value) {
             if (value < 0) throw new Error("salary can not be negative");
             if (value > 1000000) throw new Error("salary can not exceed 1 million");
@@ -97,9 +97,11 @@ const employeeSchema = new mongoose.Schema({
     },
     status: {
         type: String,
+        required: true ,
         validate(value) {
             if (!["active", "inactive"].includes(value)) throw new Error("enter valid status");
-        }
+        },
+        default: "active"
     },
     Address: {
         type: String ,

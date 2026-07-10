@@ -17,10 +17,11 @@ const departmentSchema = new mongoose.Schema({
         minLength: 10 ,
         maxLength: 60
     } ,
-    headId: {
-        type: mongoose.Schema.Types.ObjectId ,
+    headName: {
+        type: String ,
         required : true ,
-        ref: "Manager"
+        minLength: 5,
+        maxLength: 25
     }
 })
 

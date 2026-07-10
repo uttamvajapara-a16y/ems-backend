@@ -30,8 +30,8 @@ const getStats = async (req, res, next) => {
                 {
                     $lookup: {
                         from: 'departments',
-                        localField: "departmentId",
-                        foreignField: "_id",
+                        localField: "departmentName",
+                        foreignField: "departmentName",
                         as: "department"
                     }
                 },

@@ -8,7 +8,7 @@ const {validatePayrollMonth} = require('../utils/monthValidation') ;
 
 const generatePayroll = async (req, res, next) => {
     try {
-        const { employeeId, month, year, basicSalary, allowances = 0 } = req.body;
+        const { employeeId, month, year, basicSalary, allowances = 0, departmentName } = req.body;
 
         const validDates = validatePayrollMonth(month, year) ;
 
@@ -35,6 +35,8 @@ const generatePayroll = async (req, res, next) => {
             employeeModel: "Employee",
             generatedBy: req.user._id,
             generatorModel: req.user.role,
+            role: "Employee",
+            departmentName
         });
 
         await (await payroll.populate("employeeId", "firstName lastName emailId designation")).populate("generatedBy" , "firstName lastName")
@@ -48,7 +50,7 @@ const generatePayroll = async (req, res, next) => {
 
 const generatePayrollHr = async (req , res , next) => {
     try{
-        const { hrId, month, year, basicSalary, allowances = 0 } = req.body;
+        const { hrId, month, year, basicSalary, allowances = 0, departmentName } = req.body;
 
         const validDates = validatePayrollMonth(month, year) ;
 
@@ -73,8 +75,10 @@ const generatePayrollHr = async (req , res , next) => {
             allowances,
             deductions,
             employeeModel: "HR",
-            generatedBy: req.user._id,
+            generatedBy: req.admin._id,
             generatorModel: "Admin",
+            role: "HR",
+            departmentName
         });
 
         res.status(201).json({ success: true, message: "Payroll generated", data: payroll });
@@ -113,7 +117,9 @@ const generateBulkPayroll = async (req, res, next) => {
                 deductions,
                 generatedBy: req.user._id,
                 employeeModel: emp.role ,
-                generatorModel: req.user.role
+                generatorModel: req.user.role ,
+                role: "Employee",
+                departmentName: emp.departmentName
             });
             results.push(payroll);
         }
@@ -152,9 +158,11 @@ const generateBulkPayrollHr = async (req, res, next) => {
                 year,
                 basicSalary: hr.salary,
                 deductions,
-                generatedBy: req.user._id,
+                generatedBy: req.admin._id,
                 employeeModel: hr.role ,
-                generatorModel: "Admin"
+                generatorModel: "Admin",
+                role : "HR",
+                departmentName: hr.departmentName
             });
             results.push(payroll);
         }
@@ -183,12 +191,17 @@ const markAsPaid = async (req, res, next) => {
 
 const getAllPayrolls = async (req, res, next) => {
     try {
-        const { page = 1, limit = 10, month, year, status } = req.query;
+        const { page = 1, limit = 10, month, year, status, role, dept } = req.query;
         const filter = {};
 
         if (month) filter.month = month;
         if (year) filter.year = year;
         if (status) filter.status = status;
+        if (role) filter.role = role;
+        if(dept) {
+            filter.departmentName = dept ;
+            filter.role = {$nin: ["HR"]}
+        }
 
         const payrolls = await Payroll.find(filter)
             .populate("employeeId", "firstName lastName emailId designation")
