@@ -63,7 +63,7 @@ const getAuditLogs = async (req, res, next) => {
         const pageNum = Math.max(Number(page), 1);
         const limitNum = Math.min(Number(limit), 100);
         const skip = (pageNum - 1) * limitNum;
-
+ 
         const [logs, logsCount] = await Promise.all([
             AuditLog.find(filter)
                 .populate("userId", "firstName lastName emailId departmentName")

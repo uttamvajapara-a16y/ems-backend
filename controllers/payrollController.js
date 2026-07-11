@@ -211,6 +211,7 @@ const getAllPayrolls = async (req, res, next) => {
 
         const total = await Payroll.countDocuments(filter);
         const totalPages = Math.ceil(total / limit);
+        // console.log("payrolls are: ", payrolls);
 
         res.status(200).json({
             success: true,

@@ -5,14 +5,16 @@ const auditLogDB = (action, targetType) => {
         res.on("finish", async () => {
             if (res.statusCode >= 200 && res.statusCode < 300) {
                 try {
+                    const actor = req.user || req.admin;
+                    if (!actor) return;
                     await AuditLog.create({
-                        userId: req.user._id,
+                        userId: actor._id,
                         action,
                         targetType,
                         targetId: req.params.id,
                         changes: res.locals.changes,
-                        userModel: req.user.role,
-                        departmentName: req.user.departmentName
+                        userModel: actor.role,
+                        departmentName: actor.departmentName
                     })
                 } catch (err) {
                     console.error("auditLog failed :: ", err.message);

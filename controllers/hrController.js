@@ -142,10 +142,10 @@ const getHrById = async (req, res, next) => {
 
 const updateHr = async (req , res , next) => {
     try{
-        console.log(req.body) ;
+        // console.log(req.body) ;
         const allowedUpdates = ["firstName", "lastName", "emailId", "age", "gender", "profileImage", "departmentId", "managerId" , 
             "designation" , "phone" , "Address" , "salary" , "status"];
-        const isEditValid = Object.keys(req.body).every(field => allowedUpdates.includes(field)) ; 
+        const isEditValid = req.user.role === "Admin" ? true :Object.keys(req.body).every(field => allowedUpdates.includes(field)) ; 
 
         if(!isEditValid){
             return res.status(400).json({success: false, message: "update not valid"}) ;

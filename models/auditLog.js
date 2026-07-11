@@ -14,12 +14,12 @@ const auditLogSchema = new mongoose.Schema({
     action: {
         type: String,
         required: true,
-        enum: ["CREATE", "UPDATE", "DELETE", "APPROVE", "REJECT", "LOGIN", "LOGOUT"]
+        enum: ["CREATE", "UPDATE", "DELETE", "APPROVE", "REJECT", "CALCLE", "LOGIN", "LOGOUT" , "CHECK IN", "CHECK OUT", "GET"]
     },
     targetType: {
         type: String,
         required: true,
-        enum: ["Employee", "Department", "Attendance", "Leave", "Payroll", "Admin", "HR"]
+        enum: ["Employee", "Department", "Attendance", "Leave", "Payroll", "Admin", "HR", "EMPLOYEE/HR"]
     },
     date: {
         type: Date,
