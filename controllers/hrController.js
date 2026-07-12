@@ -46,17 +46,17 @@ const getHr = async (req, res, next) => {
         const filter = {};
         if (department) filter.departmentName = department;
         if (status) filter.status = status;
-        if (search) {
-            filter.$or = [
-                { firstName: { $regex: search, $options: "i" } },
-                { lastName: { $regex: search, $options: "i" } },
-                { emailId: { $regex: search, $options: "i" } },
-            ];
-        }
 
-        // if(req.user.role === "HR"){
-        //     filter.department = {$in: [req.user.departmentName]} ;
-        // }
+        if (search) {
+            const searchWords = search.trim().split(/\s+/);
+            filter.$and = searchWords.map((word) => ({
+                $or: [
+                    { firstName: { $regex: word, $options: "i" } },
+                    { lastName: { $regex: word, $options: "i" } },
+                    { emailId: { $regex: word, $options: "i" } }
+                ],
+            }));
+        }
 
         const today = new Date();
         today.setHours(0, 0, 0, 0);

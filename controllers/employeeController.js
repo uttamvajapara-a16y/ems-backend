@@ -103,12 +103,15 @@ const getEmployees = async (req, res, next) => {
         if (department) filter.departmentName = department;
         if (status) filter.status = status;
         if (search) {
-            filter.$or = [
-                { firstName: { $regex: search, $options: "i" } },
-                { lastName: { $regex: search, $options: "i" } },
-                { emailId: { $regex: search, $options: "i" } },
-                { designation: { $regex: search, $options: "i" } },
-            ];
+            const searchWords = search.trim().split(/\s+/);
+            filter.$and = searchWords.map((word) => ({
+                $or: [
+                    { firstName: { $regex: word, $options: "i" } },
+                    { lastName: { $regex: word, $options: "i" } },
+                    { emailId: { $regex: word, $options: "i" } },
+                    { designation: { $regex: word, $options: "i" } },
+                ],
+            }));
         }
 
         // if(req.user.role === "HR"){

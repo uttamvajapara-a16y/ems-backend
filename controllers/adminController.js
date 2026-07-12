@@ -66,12 +66,14 @@ const getAuditLogs = async (req, res, next) => {
  
         const [logs, logsCount] = await Promise.all([
             AuditLog.find(filter)
-                .populate("userId", "firstName lastName emailId departmentName")
+                .populate("userId", "firstName lastName emailId departmentName role")
                 .skip(skip)
                 .limit(limitNum)
                 .sort({ createdAt: -1 }),
             AuditLog.countDocuments(filter)
         ])
+
+        // console.log(logs) ;
         if (logs.length === 0) return res.status(200).json({ message: "no logs found", logs: [] });
         res.status(200).json({
             success: true,

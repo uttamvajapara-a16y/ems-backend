@@ -3,13 +3,13 @@ const mongoose = require('mongoose')
 const auditLogSchema = new mongoose.Schema({
     userId: {
         type: mongoose.Schema.Types.ObjectId,
-        refpath: "userMode",
+        refPath: "userModel",
         required: true
     },
     userModel: {
         type: String,
         required: true,
-        enum: ["Employee", "Manager", "HR", "Admin"],
+        enum: ["Employee", "HR", "Admin"],
     },
     action: {
         type: String,

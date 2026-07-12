@@ -7,7 +7,7 @@ const adminRouter = express.Router() ;
 
 adminRouter.post("/admin/registerAdmin" , adminAuth , registerUser) ;
 adminRouter.get("/admin/getProfile", adminAuth, getProfile) ;
-adminRouter.get("/admin/getAmins" , userAuth , getAdmin) ;
+adminRouter.get("/admin" , userAuth , getAdmin) ;
 adminRouter.get("/admin/getAdmin/:id" , userAuth , getAdminById) ;
 adminRouter.delete("/admin/deleteAdmin/:id", adminAuth, deleteAdmin) ;  
 adminRouter.get("/admin/auditLog" , adminAuth , getAuditLogs) ;
