@@ -17,6 +17,8 @@ const adminRouter = require("./routes/adminRouter");
 const payrollRouter = require("./routes/payrollRouter");
 const profileRouter = require("./routes/profileRouter");
 const hrRouter = require("./routes/hrRouter");
+const chatRouter = require("./routes/chatRouter");
+const initializeSocket = require("./utils/socket");
 
 
 const app = express();
@@ -32,7 +34,6 @@ app.use(cors({
     credentials: true
 }));
 
-
 app.use("/api" , authRouter) ;
 app.use("/api" , employeeRouter) ;
 app.use("/api" , departmentRouter) ;
@@ -43,12 +44,14 @@ app.use("/api" , adminRouter) ;
 app.use("/api" , payrollRouter) ;
 app.use("/api" , profileRouter) ;
 app.use("/api" , hrRouter) ;
+app.use("/api" , chatRouter) ;
 
 
 app.use(errorHandler) ;
 
 
 const server = http.createServer(app) ;
+initializeSocket(server) ;
 
 connectDB().then(() => {
     console.log("database connected successfully") ;
