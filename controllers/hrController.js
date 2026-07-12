@@ -151,7 +151,7 @@ const updateHr = async (req , res , next) => {
             return res.status(400).json({success: false, message: "update not valid"}) ;
         } else {
             const {id} = req.params ;
-            const hr = await HR.findByIdAndUpdate(id , req.body , {new: true , runValidators: true, returnDocument: "after"}).select("-password") ;
+            const hr = await HR.findByIdAndUpdate(id , req.body , {runValidators: true, returnDocument: "after"}).select("-password") ;
             return res.status(200).json({
                 success: true,
                 message: "hr updated successfully",

@@ -79,36 +79,39 @@ const login = async (req, res, next) => {
 
             const isPasswordValid = await employee.validatePassword(password);
 
-            if (isPasswordValid) {
-                await employee.populate("departmentId", "departmentName");
-                const token = await employee.getJWT();
-                res.cookie("token", token, { httpOnly: true, maxAge: 10 * 60 * 60 * 1000 });
-                const employeeObj = employee.toObject();
-                delete employeeObj.password;
-                res.send(employeeObj);
-            } else
-                return res.status(400).json({ success: false, message: "invalid credentials" })
+            if (!isPasswordValid) return res.status(400).json({ success: false, message: "invalid credentials" })
+
+            await employee.populate("departmentId", "departmentName");
+            const token = await employee.getJWT();
+            res.cookie("token", token, { httpOnly: true, maxAge: 10 * 60 * 60 * 1000 });
+            req.user = employee;
+            const employeeObj = employee.toObject();
+            delete employeeObj.password;
+            return res.send(employeeObj);
+
         } else if (role === "HR") {
             const hr = await HR.findOne({ emailId });
             if (!hr) return res.status(400).json({ success: false, message: "invalid credentials" })
 
             const isPasswordValid = await hr.validatePassword(password);
+            if (!isPasswordValid) return res.status(400).json({ success: false, message: "invalid credentials" })
 
-            if (isPasswordValid) {
-                const token = await hr.getJWT();
-                res.cookie("token", token, { httpOnly: true, maxAge: 10 * 60 * 60 * 1000 });
-                res.send(hr);
-            } else
-                return res.status(400).json({ success: false, message: "invalid credentials" })
+            const token = await hr.getJWT();
+            res.cookie("token", token, { httpOnly: true, maxAge: 10 * 60 * 60 * 1000 });
+            req.user = hr;
+            return res.send(hr);
+
         } else if (role === "Admin") {
             const admin = await Admin.findOne({ emailId });
             if (!admin) return res.status(400).json({ success: false, message: "invalid credentials" })
 
             const isPasswordValid = await admin.validatePassword(password);
             if (!isPasswordValid) return res.status(400).json({ success: false, message: "invalid credentials" })
+
             const token = await admin.getJWT();
             res.cookie("token", token, { httpOnly: true, maxAge: 10 * 60 * 60 * 1000 });
-            res.send(admin);
+            req.user = admin;
+            return res.send(admin);
         } else {
             return res.status(400).json({ message: "please provide valid role" })
         }

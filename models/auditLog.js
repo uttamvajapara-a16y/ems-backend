@@ -19,7 +19,7 @@ const auditLogSchema = new mongoose.Schema({
     targetType: {
         type: String,
         required: true,
-        enum: ["Employee", "Department", "Attendance", "Leave", "Payroll", "Admin", "HR", "EMPLOYEE/HR"]
+        enum: ["Employee", "Department", "Attendance", "Leave", "Payroll", "Admin", "HR", "EMPLOYEE/HR", "USER"]
     },
     date: {
         type: Date,
