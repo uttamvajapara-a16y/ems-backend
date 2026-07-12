@@ -11,6 +11,6 @@ leaveRouter.post('/leave/apply' , userAuth , auditLogDB("CREATE" , "Leave"), app
 leaveRouter.post('/leave/cancle' , userAuth , auditLogDB("CANCLE" , "Leave"), cancleLeave) ;
 leaveRouter.put('/leave/review/:status/:leaveId' , roleAuth , reviewLeave) ;
 leaveRouter.get('/leave/my-leaves' , userAuth , auditLogDB("GET" , "Leave"), getLeaveDetails) ;
-leaveRouter.get('/leave/all-leaves' , roleAuth , auditLogDB("CREAGETTE" , "Leave"), getAllLeaveDetails) ;
+leaveRouter.get('/leave/all-leaves' , roleAuth , auditLogDB("GET" , "Leave"), getAllLeaveDetails) ;
 
 module.exports = leaveRouter ;

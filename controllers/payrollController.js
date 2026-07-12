@@ -91,6 +91,8 @@ const generatePayrollHr = async (req , res , next) => {
 const generateBulkPayroll = async (req, res, next) => {
     try {
         const { month, year } = req.body;
+
+        const filter = req.user.role === "HR" ? ({departmentName: req.user.departmentName}) : "" ;
         
         const validDates = validatePayrollMonth(month, year) ;
         
@@ -100,7 +102,7 @@ const generateBulkPayroll = async (req, res, next) => {
             })
         }
         
-        const employees = await Employee.find({ status: "active" });
+        const employees = await Employee.find({ status: "active", ...filter });
 
         const results = [];
         for (const emp of employees) {
@@ -123,6 +125,8 @@ const generateBulkPayroll = async (req, res, next) => {
             });
             results.push(payroll);
         }
+
+        if(results.length === 0) return res.status(409).json({ success: false, message: "Payrolls already generated for all employees for this month" })
 
         res.status(201).json({ success: true, message: `Payroll generated for ${results.length} employees`, data: results });
 
@@ -166,6 +170,8 @@ const generateBulkPayrollHr = async (req, res, next) => {
             });
             results.push(payroll);
         }
+        
+        if(results.length === 0) return res.status(409).json({ success: false, message: "Payrolls already generated for all employees for this month" })
 
         res.status(201).json({ success: true, message: `Payroll generated for ${results.length} employees`, data: results });
 

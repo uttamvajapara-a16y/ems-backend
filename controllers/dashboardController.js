@@ -13,6 +13,11 @@ const getStats = async (req, res, next) => {
         const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
         const endOfMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0, 23, 59, 59);
 
+        const filter = req.user.role === "HR" ? ({
+            departmentName: req.user.departmentName,
+            role : { $ne: "HR" }
+        }) : "" ;
+
         const [
             totalEmployees,
             totalHR,
@@ -56,7 +61,7 @@ const getStats = async (req, res, next) => {
                 },
             ]),
 
-            Leave.countDocuments({ status: "pending" }),
+            Leave.countDocuments({ status: "pending", ...filter }),
 
             Attendance.aggregate([
                 { $match: { date: { $gte: startOfMonth, $lte: endOfMonth } } },
@@ -77,9 +82,9 @@ const getStats = async (req, res, next) => {
                 { $sort: { _id: 1 } },
             ]),
 
-            Leave.find({ status: "pending" })
+            Leave.find({ status: "pending"})
                 .sort({ createdAt: -1 })
-                .limit(5)
+                .limit(3)
                 .populate("applierId", "firstName lastName role profileImage"),
         ])
 
