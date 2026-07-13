@@ -1,7 +1,8 @@
 const express  = require("express") ;
 const cors = require("cors");
 const http = require("http");
-const cookieParser = require('cookie-parser')
+const cookieParser = require('cookie-parser');
+const compression = require("compression");
 require("dotenv").config() ;
 
 
@@ -26,6 +27,7 @@ const app = express();
 
 app.use(express.json());
 app.use(cookieParser()) ;
+app.use(compression()) ;
 
 
 app.use(cors({

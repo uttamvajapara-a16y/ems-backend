@@ -60,7 +60,7 @@ const generatePayrollHr = async (req , res , next) => {
             })
         }
 
-        const existing = await Payroll.findOne({ hrId, month, year });
+        const existing = await Payroll.findOne({ employeeId: hrId, month, year });
         if (existing) {
             return res.status(409).json({ success: false, message: "Payroll already generated for this month" });
         }
@@ -104,10 +104,12 @@ const generateBulkPayroll = async (req, res, next) => {
         
         const employees = await Employee.find({ status: "active", ...filter });
 
+        const existingIds = await Payroll.find({ month, year, role: "Employee" }).distinct("employeeId");
+        const existingSet = new Set(existingIds.map(id => id.toString()));
+
         const results = [];
         for (const emp of employees) {
-            const exists = await Payroll.findOne({ employeeId: emp._id, month, year });
-            if (exists) continue;
+            if (existingSet.has(emp._id.toString())) continue;
 
             const deductions = await calculateDeductions(emp._id, month, year, emp.salary);
 
@@ -149,10 +151,13 @@ const generateBulkPayrollHr = async (req, res, next) => {
         
         const hrs = await HR.find({ status: "active" });
 
+        const exists = await Payroll.find({ month, year, role: "HR" }).distinct("employeeId");
+        const existsSet = new Set(exists.map(id => id.toString()));
+
         const results = [];
         for (const hr of hrs) {
-            const exists = await Payroll.findOne({ hrId: hr._id, month, year });
-            if (exists) continue;
+            // const exists = await Payroll.findOne({ employeeId: hr._id, month, year });
+            if (existsSet.has(hr._id.toString())) continue;
 
             const deductions = await calculateDeductions(hr._id, month, year, hr.salary);
 
