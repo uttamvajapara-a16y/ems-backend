@@ -31,7 +31,11 @@ app.use(compression()) ;
 
 
 app.use(cors({
-    origin :"http://localhost:5173",
+    origin : [
+        "http://localhost:5173",
+        process.env.FRONTEND_PRODUCTION_LINK,
+        process.env.FRONTEND_PRODUCTION_LINK2
+    ],
     methods : ["GET" , "POST" , "PUT" , "DELETE"],
     credentials: true
 }));
