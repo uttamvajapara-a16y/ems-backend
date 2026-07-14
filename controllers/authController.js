@@ -8,7 +8,7 @@ const bcrypt = require("bcrypt");
 const registerUser = async (req, res, next) => {
     try {
         // validateSignup(req);
-        const { password, firstName, lastName, emailId, role, departmentName, designation, dateOfJoining, salary } = req.body;
+        const { password, firstName, lastName, emailId, role, departmentName, departmentId, designation, dateOfJoining, salary } = req.body;
         const passwordHash = await bcrypt.hash(password, 12);
 
         if (role === "Employee") {
@@ -19,6 +19,7 @@ const registerUser = async (req, res, next) => {
                 password: passwordHash,
                 status: "active",
                 departmentName,
+                departmentId,
                 designation,
                 dateOfJoining,
                 salary
@@ -36,6 +37,7 @@ const registerUser = async (req, res, next) => {
                 password: passwordHash,
                 status: "active",
                 departmentName,
+                departmentId,
                 dateOfJoining,
                 salary
             })

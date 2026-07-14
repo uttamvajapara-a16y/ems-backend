@@ -38,6 +38,7 @@ const initializeSocket = (server) => {
                     senderModel,
                     receiverModel,
                     text,
+                    createdAt: chat.createdAt,
                 })
 
             } catch (err) {

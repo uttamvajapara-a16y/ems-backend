@@ -14,7 +14,7 @@ employeeRouter.get("/employee/profile", userAuth, getProfile) ;
 employeeRouter.post("/employee/register", roleAuth, registerUser) ;
 employeeRouter.get("/employee/dashboard/employee-stats", employeeAuth, getEmployeeStats) ;
 employeeRouter.put("/employee/update/:id", userAuth, upload.single("profileImage"), auditLogDB("UPDATE" , "Employee"), updateEmployee) ;
-employeeRouter.delete("/employee/delete/:id", roleAuth, auditLogDB("DELETE" , "Employee"), deleteEmployee) ;
+employeeRouter.delete("/employees/delete/:id", roleAuth, auditLogDB("DELETE" , "Employee"), deleteEmployee) ;
 employeeRouter.get("/employees/:id", roleAuth, auditLogDB("GET" , "Employee"), getEmployeeById) ;
 
 module.exports = employeeRouter ; 

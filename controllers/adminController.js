@@ -104,4 +104,17 @@ const getProfile = async (req, res, next) => {
     }
 }
 
-module.exports = { getAdmin, getAdminById, getProfile, deleteAdmin, getAuditLogs };
+const deleteAuditLog = async (req, res, next) => {
+    try {
+        const logs = await AuditLog.deleteMany({});
+        res.status(200).json({
+            success: true,
+            message: "all audit logs deleted successfully",
+            data: logs
+        })
+    } catch (err) {
+        next(err);
+    }
+}
+
+module.exports = { getAdmin, getAdminById, getProfile, deleteAdmin, getAuditLogs, deleteAuditLog };

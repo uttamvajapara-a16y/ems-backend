@@ -7,7 +7,7 @@ const { auditLogDB } = require("../middleware/auditLogger.middleware");
 const authRouter = express.Router() ;
 
 authRouter.post("/register", adminAuth, auditLogDB("CREATE", "EMPLOYEE/HR"), registerUser) ;
-authRouter.post("/login", authRateLimit, auditLogDB("LOGIN", "USER"), login) ;
+authRouter.post("/login", auditLogDB("LOGIN", "USER"), login) ;
 authRouter.post("/logout", userAuth, auditLogDB("LOGOUT", "USER"), logout) ;
 
 module.exports = authRouter ;

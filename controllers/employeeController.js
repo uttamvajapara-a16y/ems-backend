@@ -128,14 +128,6 @@ const updateEmployee = async (req, res, next) => {
             return res.status(400).json({ success: false, message: "update not valid" })
         } else {
             if (req.file) {
-                // const result = await new Promise((resolve, reject) => {
-                //     cloudinary.uploader.upload_stream({ folder: "employee_profiles" }, (error, result) => {
-                //         if (error) reject(error);
-                //         else resolve(result);
-                //     }).end(req.file.buffer);
-                // });
-                // req.body.profileImage = result.secure_url;
-
                 const result = await cloudinary.uploader.upload(req.file.path);
                 req.body.profileImage = result.secure_url;
             } else {
