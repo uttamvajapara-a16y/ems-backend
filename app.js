@@ -29,15 +29,17 @@ app.use(express.json());
 app.use(cookieParser()) ;
 app.use(compression()) ;
 
+const allowedOrigins = [
+    "http://localhost:5173",
+    process.env.FRONTEND_PRODUCTION_LINK,
+    process.env.FRONTEND_PRODUCTION_LINK2
+].filter(origin => origin);
 
 app.use(cors({
-    origin : [
-        "http://localhost:5173",
-        process.env.FRONTEND_PRODUCTION_LINK,
-        process.env.FRONTEND_PRODUCTION_LINK2
-    ],
+    origin : allowedOrigins.length > 1 ? allowedOrigins : (process.env.FRONTEND_PRODUCTION_LINK || "*"),
     methods : ["GET" , "POST" , "PUT" , "DELETE"],
-    credentials: true
+    credentials: true,
+    optionsSuccessStatus: 200
 }));
 
 app.use("/api" , authRouter) ;
