@@ -126,4 +126,33 @@ const logout = async (req, res, next) => {
     res.send("logout successfull")
 }
 
-module.exports = { login, logout, registerUser };
+const changePassword = async (req, res, next) => {
+    try {
+        const { oldPassword, newPassword, role } = req.body;
+        let user;
+
+        if (role === "Employee") {
+            user = await Employee.findById(req.user._id);
+        } else if (role === "HR") {
+            user = await HR.findById(req.user._id);
+        } else if (role === "Admin") {
+            user = await Admin.findById(req.user._id);
+        }
+
+        if (!user) return res.status(404).json({ success: false, message: "user not found" });
+
+        const isOldPasswordValid = await user.validatePassword(oldPassword);
+
+        if (!isOldPasswordValid) return res.status(400).json({ success: false, message: "incorrect old password" });
+
+        const newPasswordHash = await bcrypt.hash(newPassword, 12);
+        user.password = newPasswordHash;
+        await user.save();
+
+        res.status(200).json({ success: true, message: "password changed successfully" });
+    } catch (err) {
+        next(err);
+    }
+}
+
+module.exports = { login, logout, registerUser, changePassword };
