@@ -73,7 +73,6 @@ const getAuditLogs = async (req, res, next) => {
             AuditLog.countDocuments(filter)
         ])
 
-        // console.log(logs) ;
         if (logs.length === 0) return res.status(200).json({ message: "no logs found", logs: [] });
         res.status(200).json({
             success: true,

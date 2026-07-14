@@ -17,7 +17,6 @@ const initializeSocket = (server) => {
     io.on("connection", (socket) => {
         socket.on("joinChat", ({ firstName, lastName, senderId, receiverId }) => {
             const roomId = getRoomId(senderId, receiverId);
-            // console.log(firstName + " " + lastName + " joined room : " + roomId);
             socket.join(roomId);
         })
 
@@ -42,12 +41,12 @@ const initializeSocket = (server) => {
                 })
 
             } catch (err) {
-                console.log("Error in getting Chats ", err.message);
+                return res.status(400).json({success: false , message: "Error in loading chats"})
             }
         })
 
         socket.on("disconnect", () => {
-            console.log("User Disconnected");
+            // console.log("User Disconnected");
         })
     })
 }

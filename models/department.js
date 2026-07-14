@@ -20,7 +20,7 @@ const departmentSchema = new mongoose.Schema({
     headName: {
         type: String ,
         required : true ,
-        minLength: 5,
+        minLength: 3,
         maxLength: 25
     }
 })

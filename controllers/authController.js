@@ -50,7 +50,6 @@ const registerUser = async (req, res, next) => {
                 emailId,
                 password: passwordHash,
             })
-            console.log(admin);
             const savedAdmin = await admin.save();
 
             return res.status(201).json({

@@ -28,7 +28,6 @@ const getContacts = async (req, res, next) => {
 
         // combine everyone into one flat list, excluding the current logged-in user
         const allContacts = [...employees, ...hrs, ...admins].filter((c) => c._id.toString() !== currentUserId) ;
-        // console.log("All contacts: ", allContacts);
 
         // group by department name
         const grouped = {} ;
@@ -37,8 +36,6 @@ const getContacts = async (req, res, next) => {
             if(!grouped[deptName]) grouped[deptName] = [] ;
             grouped[deptName].push(contact) ;
         })
-
-        // console.log("group",grouped) ;
 
         res.status(200).json({
             success: true,

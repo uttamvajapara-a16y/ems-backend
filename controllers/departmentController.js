@@ -34,8 +34,8 @@ const getDepartmentById = async (req, res, next) => {
 const updateDepartmentById = async (req, res, next) => {
     try{
         const id = req.params.id ;
-        const {departmentName, description, headId} = req.body ;
-        const updatedDepartment = await Department.findByIdAndUpdate(id, {departmentName, description, headId}, {returnDocument: 'after', runValidators: true}) ;
+        const {departmentName, description, headName} = req.body ;
+        const updatedDepartment = await Department.findByIdAndUpdate(id, {departmentName, description, headName}, {returnDocument: 'after', runValidators: true}) ;
         res.status(200).json({message: "department updated successfully", data: updatedDepartment}) ;
     } catch (err){
         next(err) ;

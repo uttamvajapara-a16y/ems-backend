@@ -106,7 +106,6 @@ const getHr = async (req, res, next) => {
             empObj.todayStatus = map[emp._id.toString()] || "not-marked";
             return empObj;
         });
-        // console.log(employeesWithStatus) ;
 
         res.status(200).json({
             success: true,
@@ -142,7 +141,6 @@ const getHrById = async (req, res, next) => {
 
 const updateHr = async (req , res , next) => {
     try{
-        // console.log(req.body) ;
         const allowedUpdates = ["firstName", "lastName", "emailId", "age", "gender", "profileImage", "departmentId", "managerId" , 
             "designation" , "phone" , "Address" , "salary" , "status"];
         const isEditValid = req.user.role === "Admin" ? true :Object.keys(req.body).every(field => allowedUpdates.includes(field)) ; 
