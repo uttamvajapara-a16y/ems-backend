@@ -9,7 +9,11 @@ const initializeSocket = (server) => {
 
     const io = socket(server, {
         cors: {
-            origin: process.env.FRONTEND_URL,
+            origin: [
+                process.env.FRONTEND_URL,
+                process.env.FRONTEND_PRODUCTION_LINK,
+                process.env.FRONTEND_PRODUCTION_LINK2
+            ],
             credentials: true
         }
     });
@@ -20,7 +24,7 @@ const initializeSocket = (server) => {
             socket.join(roomId);
         })
 
-        socket.on("sendMessage", async ({senderId, receiverId, senderModel, receiverModel, text }) => {
+        socket.on("sendMessage", async ({ senderId, receiverId, senderModel, receiverModel, text }) => {
             try {
                 const roomId = getRoomId(senderId, receiverId);
                 // let chat = await Chat.find({senderId, receiverId}) ;
@@ -42,7 +46,7 @@ const initializeSocket = (server) => {
                 })
 
             } catch (err) {
-                return res.status(400).json({success: false , message: "Error in loading chats"})
+                return res.status(400).json({ success: false, message: "Error in loading chats" })
             }
         })
 
