@@ -73,7 +73,7 @@ DATABASE_CONNECTION_STRING=your_mongodb_connection_string
 JWT_SECRET_KEY=your_jwt_secret
 FRONTEND_URL=http://localhost:5173
 RAZORPAY_KEY_ID=your_razorpay_key_id
-FRONTEND_PRODUCTION_LINK=your_deployed_frontedn_link
+FRONTEND_PRODUCTION_LINK=your_deployed_frontend_link
 
 CLOUDINARY_CLOUD_NAME=your_cloud_name
 CLOUDINARY_API_KEY=your_api_key
